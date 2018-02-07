@@ -1,0 +1,17 @@
+{
+	"version": "0.1.0",
+	"command": "tsc-plus",
+	"isShellCommand": true,
+	"suppressTaskName": true,
+	"tasks": [
+		{
+			"taskName": "build",
+			"args": [
+				"--reorderFiles",
+				"--module",
+				"amd"
+			],
+			"problemMatcher": "$tsc"
+		}
+	]
+}

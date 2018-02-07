@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "sourceRoot": "src",
+        "outFile": "bin/dragon/dragon.js",
+        "declaration": true
+    },
+    "include": [
+        "libs/**/*.ts",
+        "src/**/*.ts"
+    ]
+}

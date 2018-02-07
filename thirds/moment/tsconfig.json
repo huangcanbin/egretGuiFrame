@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outFile": "bin/moment/moment.js",
+    "allowJs": true
+  },
+  "files": [
+    "src/moment.js",
+    "src/zh-cn.js"
+  ]
+}

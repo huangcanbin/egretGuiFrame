@@ -1,0 +1,22 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "chrome",
+			"request": "launch",
+			"name": "调试",
+			"trace": true,
+			"smartStep": true,
+			"sourceMaps": true,
+			"userDataDir": "${tempdir}",
+			"webRoot": "${workspaceRoot}",
+			"file": "${workspaceRoot}/binary/index.html",
+			// "runtimeExecutable": "/usr/bin/chromium",
+			"runtimeArgs": [
+				"--allow-file-access-from-files",
+				"--allow-file-access-frome-files"
+			],
+			"preLaunchTask": "build"
+		}
+	]
+}

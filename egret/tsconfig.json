@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outFile": "bin/egret/egret.js",
+        "declaration": true
+    },
+    "files": [
+        "libs/assetsmanager.d.ts",
+        "libs/dragonBones.d.ts",
+        "libs/egret.d.ts",
+        "libs/eui.d.ts",
+        "libs/experimental.d.ts",
+        "libs/lib.d.ts",
+        "libs/lib.es2015.promise.d.ts",
+        "libs/resourcemanager.d.ts",
+        "libs/game.d.ts",
+        "libs/res.d.ts",
+        "libs/media.d.ts",
+        "libs/tween.d.ts"
+    ]
+}

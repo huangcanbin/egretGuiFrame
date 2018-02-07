@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outFile": "bin/socket/socket.js",
+    "declaration": true
+  },
+  "files": [
+    "src/GameWebSocket.ts",
+    "src/HTML5WebSocket.ts",
+    "src/ISocket.ts",
+    "src/NativeSocket.ts",
+    "src/WebSocket.ts",
+    "src/WebSocketClass.ts",
+    "libs/dragonBones.d.ts",
+    "libs/egret.d.ts",
+    "libs/eui.d.ts",
+    "libs/game.d.ts",
+    "libs/meru.d.ts",
+    "libs/res.d.ts",
+    "libs/tween.d.ts"
+  ]
+}

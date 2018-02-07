@@ -1,0 +1,8 @@
+{
+  "name": "egret",
+  "version": "2.5.0",
+  "dep": [
+    "egret"
+  ],
+  "typings": "src/cm/NestForCM.ts"
+}
