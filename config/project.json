@@ -1,0 +1,168 @@
+{
+    "GameConfig": {
+        "ProjectName": "jianghu",
+        "BoxAnimation": "BoxBounceAnimation",
+        "PanelAnimation": "meru.NoneAnimation",
+        "TooltipClass": "andes.components.Tooltip",
+        "SimpleLoadingClass": "andes.components.SimpleLoading",
+        "ProgressLoadingClass": "SceneLoading",
+        "ConfirmClass": "andes.components.Confirm",
+        "LoadSceneClass": "andes.components.LoadScene",
+        "ItemModelClass": "BagItemModel",
+        "AnimationBlueprint": "blueprint_json"
+    },
+    "Game": {
+  },
+    "Modules": {
+        "TimeMonitor": {
+            "Setting": "andes.timemonitor.Setting",
+            "Property": {}
+        },
+        "Lock": {
+            "Setting": "andes.lock.Setting",
+            "Property": {
+                "Level": "User.getInfo.i.lv",
+                "LockFile": "lock_json",
+                "LevelDefaultMessage": "用户等级达到{level}级后开启"
+            }
+        },
+        "RedPoint": {
+            "Setting": "andes.redpoint.Setting",
+            "Property": {
+                "RedPointFile": "redpoint_json"
+            }
+        },
+        "Listener": {
+            "Setting": "andes.listener.Setting",
+            "Property": {
+                "CallbackClass": "ListenerCallback"
+            }
+        },
+        "Enough": {
+            "Setting": "andes.enough.Setting",
+            "Property": {
+                "SupplementClass": "EnoughSupplement",
+                "Items": {
+                    "MONEY": {
+                        "Type": "MONEY",
+                        "Where": "User.getInfo.i.gc",
+                        "Confirm": "通用.钻石不足",
+                        "CanSupplement": true
+                    },
+                    "COIN": {
+                        "Type": "COIN",
+                        "Where": "User.getInfo.i.sc",
+                        "Confirm": "通用.金币不足",
+                        "CanSupplement": true
+                    },
+                    "ITEM": {
+                        "Type": "ITEM",
+                        "Confirm": "通用.道具不足",
+                        "CanSupplement": true
+                    },
+                    "FRIEND": {
+                        "Type": "FRIEND",
+                        "Confirm": "通用.好友不足",
+                        "CanSupplement": true
+                    },
+                    "HP": {
+                        "Type": "HP",
+                        "Where": "User.getInfo.i.hp.num",
+                        "Confirm": "通用.血量不足",
+                        "CanSupplement": true
+                    },
+                    "LV": {
+                        "Type": "LV",
+                        "Where": "User.getInfo.i.lv",
+                        "Confirm": "通用.玩家等级不足",
+                        "CanSupplement": true
+                    },
+                    "MENTAL": {
+                        "Type": "MENTAL",
+                        "Where": "User.getInfo.i.mental.num",
+                        "Confirm": "通用.脑力不足",
+                        "CanSupplement": true
+                    },
+                    "POWER": {
+                        "Type": "POWER",
+                        "Where": "User.getInfo.i.power.num",
+                        "Confirm": "通用.体力不足",
+                        "CanSupplement": true
+                    }
+                }
+            }
+        },
+        "Login": {
+            "Setting": "andes.login.Setting",
+            "Property": {
+                "ServerListUrl": "http://g1.jiongshu.jianghu.58h5.com/sl/gs.php",
+                "AreaRequestUrl": "http://devi.bearjoy.com/jianghu-api/www/bearjoy/local/api.php",
+                "LoginCallback": "LoginCallback",
+                "UsernameKey": "UserName1",
+                "PasswordKey": "PassWord1",
+                "LoginSkinName": "LoginSkin",
+                "LoginAreaSkinName": "LoginAreaSkin",
+                "AreaListSkinName": "AreaListSkin",
+                "AreaItemSkinName": "AreaListItemSkin"
+            }
+        },
+        "Component": {
+            "Setting": "andes.components.Setting",
+            "Property": {
+                "TooltipSkin": "TooltipSkin",
+                "TooltipDelay": 1500,
+                "SimpleLoadingSkin": "SimpleLoadingSkin",
+                "ConfirmSkin": "ConfirmSkin",
+                "SubConfirmView": "DefaultConfirmViewSkin",
+                "ProgressLoadingSkin": "ProgressLoadingSkin",
+                "ConfirmSize": 20,
+                "ConfirmYes": "确认",
+                "ConfirmNo": "取消",
+                "ConfirmClose": false
+            }
+        },
+        "Mail": {
+            "Setting": "andes.mail.Setting",
+            "Property": {
+                "IsHistoryComponent": true,
+                "MailSkinName": "MailSkin",
+                "MailItemRendererSkinName": "MailItemSkin",
+                "MailDetailSkinName": "MailDetailSkin",
+                "DateFormat": "YYYY-MM-DD hh:mm:ss"
+            }
+        },
+        "Guide": {
+            "Setting": "andes.guide.Setting",
+            "Property": {
+                "LeftTalkSkinName": "GuideLeftTalkSkin",
+                "RightTalkSkinName": "GuideRightTalkSkin",
+                "ButtonSkinName": "GuideButtonMaskSkin",
+                "ButtonMask":"andes.guide.ButtonMoveMask",
+                "GuideFileName":"guide_json"
+            }
+        },
+        "Channel": {
+            "Setting": "andes.channel.Setting",
+            "Property": {
+                "weibo": "",
+                "ivGame": "",
+                "qqGame": "",
+                "egretGame": "",
+                "threesixzero": "",
+                "sevenfoursevenseven": ""
+            }
+        },
+        "Prompt": {
+            "Setting": "andes.prompt.Setting",
+            "Property": {
+                "PromptFile": "prompt_json"
+            }
+        },
+        "Socket": {
+            "Setting": "andes.socket.Setting",
+            "Property": {
+                "Callback": "SocketCallback"
+            }
+        }
+    }
+}

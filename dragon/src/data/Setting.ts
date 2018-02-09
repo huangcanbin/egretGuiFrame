@@ -22,6 +22,12 @@ module dragon
         LoadSceneClass: string;       //加载场景类
     }
 
+    /**
+     * 数据配置设置（项目）
+     * @export
+     * @class Setting
+     * @implements {ISetting}
+     */
     export class Setting implements ISetting
     {
         private _setting: ISetting;
@@ -103,21 +109,27 @@ module dragon
         public init(setting: ISetting): void
         {
             this._setting = setting;
-            //localStorage.setPrefix(this._setting.ProjectName + "-" + extra.spId);
+            dragon.LocalStorage.setPrefix(this._setting.ProjectName + "-" + dragon.extra.spid);
         }
 
-        static init(game_config: any): void
+        /**
+         * 初始化游戏在项目层级上的配置数据
+         * @static
+         * @param {*} config 
+         * @memberof Setting
+         */
+        public static init(config: any): void
         {
-            var conf: ISetting = Obj.getValue(game_config, "GameConfig");
-            dragon.singleton(Setting).init(conf);
-            var modules = Obj.getValue(game_config, "Modules");
-            for (var key in modules)
+            let gameConf: ISetting = Obj.getValue(config, "GameConfig");
+            dragon.singleton(Setting).init(gameConf);
+            let modules = Obj.getValue(config, "Modules");
+            for (let key in modules)
             {
-                var moduleVal = modules[key];
-                var className = moduleVal["Setting"];
+                let moduleVal = modules[key];
+                let className = moduleVal["Setting"];
                 if (className)
                 {
-                    var definition = egret.getDefinitionByName(className);
+                    let definition = egret.getDefinitionByName(className);
                     if (definition)
                     {
                         definition.init(moduleVal["Property"]);

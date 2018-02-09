@@ -1,0 +1,279 @@
+{
+    "开场": [
+        {
+            "stepId": "开场",
+            "roleDirection": "left",
+            "talkMsg": "欢迎来到无节操学院，邀请好友，组建自己的学院吧！"
+        },
+        {
+            "stepId": "开场",
+            "next": "任务1"
+        }
+    ],
+    "任务1": [
+        {
+            "stepId": "任务1",
+            "button": "任务界面"
+        },
+        {
+            "stepId": "任务1",
+            "roleDirection": "left",
+            "talkMsg": "前期资金匮乏，需要通过做任务来积累金币和经验"
+        },
+        {
+            "stepId": "任务1",
+            "button": "做任务1",
+            "loop": 1
+        },
+        {
+            "stepId": "任务1",
+            "button": "关闭升级面板"
+        },
+        {
+            "stepId": "任务1",
+            "roleDirection": "left",
+            "talkMsg": "做任务会消耗体力，越高级的任务消耗越多，对装备也有要求"
+        },
+        {
+            "stepId": "任务1",
+            "roleDirection": "left",
+            "talkMsg": "任务的装备可在商店中购买"
+        },
+        {
+            "stepId": "任务1",
+            "next": "商店"
+        }
+    ],
+    "商店": [
+        {
+            "stepId": "商店",
+            "button": "商店界面"
+        },
+        {
+            "stepId": "商店",
+            "button": "购买商品1"
+        },
+        {
+            "stepId": "商店",
+            "next": "任务2"
+        }
+    ],
+    "任务2": [
+        {
+            "stepId": "任务2",
+            "button": "任务界面"
+        },
+        {
+            "stepId": "任务2",
+            "roleDirection": "left",
+            "talkMsg": "拥有任务道具后，就可完成进阶任务啦！"
+        },
+        {
+            "stepId": "任务2",
+            "button": "做任务2",
+            "loop": 1
+        },
+        {
+            "stepId": "任务2",
+            "button": "关闭升级面板"
+        },
+        {
+            "stepId": "任务2",
+            "next": "建筑"
+        }
+    ],
+    "建筑": [
+        {
+            "stepId": "建筑",
+            "button": "建筑界面"
+        },
+        {
+            "stepId": "建筑",
+            "roleDirection": "left",
+            "talkMsg": "积攒的金币购买学院建筑，不仅提升学员士气，还带来稳定收入"
+        },
+        {
+            "stepId": "建筑",
+            "button": "bl1"
+        },
+        {
+            "stepId": "建筑",
+            "button": "解锁"
+        },
+        {
+            "stepId": "建筑",
+            "button": "关闭解锁面板"
+        },
+        {
+            "stepId": "建筑",
+            "next": "建筑2"
+        }
+    ],
+    "建筑2": [
+        {
+            "stepId": "建筑2",
+            "button": "建筑界面"
+        },
+        {
+            "stepId": "建筑2",
+            "roleDirection": "left",
+            "talkMsg": "解锁的建筑可以通过升级来增加产出"
+        },
+        {
+            "stepId": "建筑2",
+            "button": "解锁"
+
+        },
+        {
+            "stepId": "建筑2",
+            "next": "银行"
+        }
+    ],
+    "银行": [
+        {
+            "stepId": "银行",
+            "button": "home"
+        },
+        {
+            "stepId": "银行",
+            "button": "bank"
+        },
+        {
+            "stepId": "银行",
+            "roleDirection": "left",
+            "talkMsg": "开通银行后，可将现金存入，避免被其他玩家抢走"
+        },
+        {
+            "stepId": "银行",
+            "button": "开户"
+        },
+        {
+            "stepId": "银行",
+            "button": "开户2"
+        },
+        {
+            "stepId": "银行",
+            "next": "好友"
+        }
+    ],
+    "好友": [
+        {
+            "stepId": "好友",
+            "button": "好友界面"
+        },
+        {
+            "stepId": "好友",
+            "roleDirection": "left",
+            "talkMsg": "购买的道具除了用于任务，还可被学员装备"
+        },
+        {
+            "stepId": "好友",
+            "button": "扩充好友"
+        },
+        {
+            "stepId": "好友",
+            "button": "加好友0"
+        },
+        {
+            "stepId": "好友",
+            "roleDirection": "left",
+            "talkMsg": "只要请求通过，好友会自动变成你的学员"
+        },
+        {
+            "stepId": "好友",
+            "button": "关闭好友添加弹窗"
+        },
+        {
+            "stepId": "好友",
+            "next": "好友2"
+        }
+    ],
+    "好友2": [
+        {
+            "stepId": "好友2",
+            "button": "好友界面"
+        },
+        {
+            "stepId": "好友2",
+            "roleDirection": "left",
+            "talkMsg": "现在你有了一位好友伙伴，装备他让他为你而战吧！"
+        },
+        {
+            "stepId": "好友2",
+            "button": "选中好友0"
+        },
+        {
+            "stepId": "好友2",
+            "button": "装备道具1"
+        },
+        {
+            "stepId": "好友2",
+            "roleDirection": "left",
+            "talkMsg": "战力提升了，现在就去小试身手一下吧！"
+        },
+        {
+            "stepId": "好友2",
+            "button": "关闭详细界面"
+        },
+        {
+            "stepId": "好友2",
+            "next": "战斗"
+        }
+    ],
+    "战斗": [
+        {
+            "stepId": "战斗",
+            "button": "战斗界面"
+        },
+        {
+            "stepId": "战斗",
+            "roleDirection": "left",
+            "talkMsg": "打败其他人来掠夺他们的金币资源"
+        },
+        {
+            "stepId": "战斗",
+            "button": "挑战0"
+        },
+        {
+            "stepId": "战斗",
+            "delay": 3000
+        },
+        {
+            "stepId": "战斗",
+            "roleDirection": "left",
+            "talkMsg": "每次战斗都会消耗脑力值，战斗失败则扣除更多血量，血量较低则无法战斗了"
+        },
+        {
+            "stepId": "战斗",
+            "next": "医院"
+        }
+    ],
+    "医院": [
+        {
+            "stepId": "医院",
+            "button": "战斗界面"
+        },
+        {
+            "stepId": "医院",
+            "button": "治疗"
+        },
+        {
+            "stepId": "医院",
+            "roleDirection": "left",
+            "talkMsg": "脑力充足，没有血量可以去医院治疗恢复血量"
+        },
+        {
+            "stepId": "医院",
+            "button": "加血"
+        },
+        {
+            "stepId": "医院",
+            "button": "home"
+        },
+        {
+            "stepId": "医院",
+            "roleDirection": "left",
+            "talkMsg": "新手引导到这就结束啦，火速邀请好友来助阵吧！"
+        }
+    ]
+}
