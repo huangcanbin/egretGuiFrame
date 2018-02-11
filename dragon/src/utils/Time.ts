@@ -1,5 +1,6 @@
 /**
  * @author Andrew_Huang
+ * 时间操作类：延迟、判断时间戳
  */
 module dragon
 {
