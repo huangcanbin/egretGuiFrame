@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "es5",
-        "outFile": "bin/dragon/dragon.js",
+        "outFile": "bin/platform/platform.js",
         "declaration": true
     },
     "include": [
