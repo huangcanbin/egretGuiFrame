@@ -306,6 +306,14 @@ module dragon
                         break;
                 }
             }
+            if (!isLoop)
+            {
+                this._timeLine.call(() =>
+                {
+                    BaseAnimation.removeAnimation(target, this);
+                });
+            }
+            this._isRunning = true;
             return this;
         }
 
