@@ -9,7 +9,7 @@ module dragon
      * @class BoxAnimation
      * @implements {dragon.IUIAnimation}
      */
-    export class BoxAnimation implements dragon.IUIAnimation
+    export class BaseBoxAnimation implements dragon.IUIAnimation
     {
         private _displayObject: IUIAnimationDisplay;
 

@@ -11,8 +11,21 @@ module dragon
      */
     export enum UI_TYPE
     {
-        BOX = 'box',
-        MASK = 'mask'
+        BOX = 'box',    //弹框
+        MASK = 'mask'   //遮罩
+    }
+
+    /**
+     * UI 动画进入方向
+     * @export
+     * @enum {number}
+     */
+    export enum ANI_UI_DIRECTION
+    {
+        FROM_RIGT = 1,
+        FROM_LEFT = 2,
+        FROM_TOP = 3,
+        FROM_BOTTOM = 4
     }
 
     /**
