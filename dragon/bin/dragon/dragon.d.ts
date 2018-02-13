@@ -1,3 +1,251 @@
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 动画基类
+     * @export
+     * @class BaseAnimation
+     * @implements {dragon.IAnimation}
+     */
+    class BaseAnimation implements dragon.IAnimation {
+        private _target;
+        private _timeLine;
+        private _aniInfoArr;
+        private _isRunning;
+        private static _aniMap;
+        private static _aniId;
+        constructor();
+        target: any;
+        readonly isRunning: boolean;
+        private onComplete();
+        /**
+         * 设置动画目标，并返回动画实例
+         * @param {*} obj
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        setTarget(obj: any): dragon.IAnimation;
+        /**
+         * 设置动画：移动到目标点
+         * @param {number} duration 时间
+         * @param {*} prop          动画参数
+         * @param {*} [ease]        动画展示方式
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        to(duration: number, props: any, ease?: any): dragon.IAnimation;
+        /**
+         * 设置动画展示方式
+         * @private
+         * @param {*} props
+         * @param {*} [ease]
+         * @memberof BaseAnimation
+         */
+        private mergeEase(props, ease?);
+        /**
+         * 设置坐标点为参数点
+         * @private
+         * @param {*} props
+         * @param {string} [type='by']
+         * @returns {*}
+         * @memberof BaseAnimation
+         */
+        private toProps(props, type?);
+        /**
+         * 初始化参数坐标点为0
+         * @private
+         * @param {*} props
+         * @param {string} [type='by']
+         * @returns {*}
+         * @memberof BaseAnimation
+         */
+        private fromProps(props, type?);
+        /**
+         * 设置动画信息：设置参数
+         * @param {*} props
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        setProps(props: any): dragon.IAnimation;
+        /**
+         * 设置动画信息：移除
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        remove(): dragon.IAnimation;
+        /**
+         * 缩放动画
+         * @param {number} duration
+         * @param {number} scale
+         * @param {number} [delay]  延迟时间或者动画播放方式
+         * @param {*} [ease]
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        zoom(duration: number, scale: number, delay?: any, ease?: any): dragon.IAnimation;
+        /**
+         * 动画播放方式：by
+         * @param {number} duration
+         * @param {*} props
+         * @param {*} [ease]
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        by(duration: number, props: any, ease?: any): dragon.IAnimation;
+        /**
+         * 动画播放类型：延迟 delay
+         * @param {number} time
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        delay(duration: number): dragon.IAnimation;
+        /**
+         * 动画回调
+         * @param {Function} callback
+         * @param {Object} [context]
+         * @param {any} args
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        call(callback: Function, context?: Object, ...args: any[]): dragon.IAnimation;
+        /**
+         * 闪烁动画
+         * @param {number} duration 动画时间
+         * @param {number} blinks   闪烁的次数
+         * @param {*} [ease]
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        blink(duration: number, blinks: number, ease?: any): dragon.IAnimation;
+        /**
+         * 淡入淡出动画
+         * @param {number} duration
+         * @param {*} [ease]
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        fadeInOut(duration: number, ease?: any): dragon.IAnimation;
+        /**
+         * 播放动画
+         * @param {*} [target=this._target]
+         * @param {boolean} [isLoop]
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        run(target?: any, isLoop?: boolean): dragon.IAnimation;
+        shake(duration: number, offsetX: any, offestY?: any, ease?: any): dragon.IAnimation;
+        score(duration: number, beginScore: any, endScore?: any, ease?: any): dragon.IAnimation;
+        /**
+         * 停止动画（进度设置为1表示完成）
+         * @memberof BaseAnimation
+         */
+        stop(): void;
+        pause(): void;
+        resume(): void;
+        destroy(): void;
+        /**
+         * 给目标添加动画
+         * @static
+         * @param {*} target
+         * @param {dragon.IAnimation} animation
+         * @memberof BaseAnimation
+         */
+        static addAnimation(target: any, animation: dragon.IAnimation): void;
+        /**
+         * 移除动画目标
+         * @static
+         * @param {*} target
+         * @param {dragon.IAnimation} animation
+         * @memberof BaseAnimation
+         */
+        static removeAnimation(target: any, animation: dragon.IAnimation): void;
+        /**
+         * 停止目标动画
+         * @static
+         * @param {*} target
+         * @param {boolean} [remove=true] 是否移除动画
+         * @memberof BaseAnimation
+         */
+        static stopAnimationByTarget(target: any, remove?: boolean): void;
+        /**
+         * 暂停目标动画
+         * @static
+         * @param {*} target
+         * @memberof BaseAnimation
+         */
+        static pauseAnimationByTarget(target: any): void;
+        /**
+         * 重启目标动画
+         * @static
+         * @param {*} target
+         * @memberof BaseAnimation
+         */
+        static resumeAnimationByTarget(target: any): void;
+        /**
+         * 移除目标动画
+         * @static
+         * @param {*} target
+         * @memberof BaseAnimation
+         */
+        static removeAnimationByTarget(target: any): void;
+        static by(duration: number, props: any, ease?: any): IAnimation;
+        static to(duration: number, props: any, ease?: any): IAnimation;
+        static call(callback: Function, context: any): IAnimation;
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 动画信息类型
+     * @export
+     * @enum {number}
+     */
+    enum AniPropsType {
+        DELAY = 1,
+        SET = 2,
+        BY = 3,
+        REMOVE = 4,
+        CALL = 5,
+    }
+    /**
+     * 动画信息
+     * @export
+     * @interface AnimationInfo
+     */
+    interface AnimationInfo {
+        duration: number;
+        props: any;
+        type?: number;
+    }
+    /**
+     * 基础动画接口
+     * @export
+     * @interface IAnimation
+     */
+    interface IAnimation {
+        target: any;
+        score(duration: number, beginScore: any, endScore?: any, ease?: any): IAnimation;
+        shake(duration: number, offsetX: any, offestY?: any, ease?: any): IAnimation;
+        to(duration: number, props: any, ease?: any): IAnimation;
+        by(duration: number, props: any, ease?: any): IAnimation;
+        zoom(duration: number, scale: number, delay?: any, ease?: any): IAnimation;
+        delay(duration: number): IAnimation;
+        blink(duration: number, blinks: number, ease?: any): IAnimation;
+        call(callback: () => void, context?: Object, ...args: any[]): IAnimation;
+        setProps(props: any): IAnimation;
+        remove(): IAnimation;
+        fadeInOut(duration: number, ease?: any): IAnimation;
+        destroy(): void;
+        stop(): void;
+        pause(): void;
+        setTarget(obj: any): IAnimation;
+        resume(): void;
+        run(target?: any, isLoop?: boolean): IAnimation;
+    }
+}
 declare module dragon {
     /**
      * A星寻路入口

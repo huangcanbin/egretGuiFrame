@@ -8,6 +8,447 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 动画基类
+     * @export
+     * @class BaseAnimation
+     * @implements {dragon.IAnimation}
+     */
+    var BaseAnimation = /** @class */ (function () {
+        function BaseAnimation() {
+            this._isRunning = false; //动画是否正在播放
+            this._timeLine = new TimelineMax({
+                onComplete: this.onComplete.bind(this)
+            });
+        }
+        Object.defineProperty(BaseAnimation.prototype, "target", {
+            get: function () {
+                return this._target;
+            },
+            set: function (value) {
+                this._target = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BaseAnimation.prototype, "isRunning", {
+            get: function () {
+                return this._isRunning;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        BaseAnimation.prototype.onComplete = function () {
+            BaseAnimation.removeAnimation(this.target, this);
+        };
+        /**
+         * 设置动画目标，并返回动画实例
+         * @param {*} obj
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.setTarget = function (obj) {
+            this.target = obj;
+            return this;
+        };
+        /**
+         * 设置动画：移动到目标点
+         * @param {number} duration 时间
+         * @param {*} prop          动画参数
+         * @param {*} [ease]        动画展示方式
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.to = function (duration, props, ease) {
+            this.mergeEase(props, ease);
+            this._aniInfoArr.push({ duration: duration / 1000, props: props });
+            return this;
+        };
+        /**
+         * 设置动画展示方式
+         * @private
+         * @param {*} props
+         * @param {*} [ease]
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.mergeEase = function (props, ease) {
+            props['ease'] = ease ? ease : Linear.easeNone;
+        };
+        /**
+         * 设置坐标点为参数点
+         * @private
+         * @param {*} props
+         * @param {string} [type='by']
+         * @returns {*}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.toProps = function (props, type) {
+            if (type === void 0) { type = 'by'; }
+            var obj = {};
+            for (var key in props) {
+                var num = props[key];
+                if (type == 'by' || key == 'x' || key == 'y') {
+                    obj[key] = num > 0 ? '+=' + num : '-=' + Math.abs(num);
+                }
+                else {
+                    obj[key] = '' + num;
+                }
+            }
+            return obj;
+        };
+        /**
+         * 初始化参数坐标点为0
+         * @private
+         * @param {*} props
+         * @param {string} [type='by']
+         * @returns {*}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.fromProps = function (props, type) {
+            if (type === void 0) { type = 'by'; }
+            var obj = {};
+            for (var key in props) {
+                obj[key] = '+=0';
+            }
+            return obj;
+        };
+        /**
+         * 设置动画信息：设置参数
+         * @param {*} props
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.setProps = function (props) {
+            this._aniInfoArr.push({ duration: 0, props: props, type: dragon.AniPropsType.SET });
+            return this;
+        };
+        /**
+         * 设置动画信息：移除
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.remove = function () {
+            this._aniInfoArr.push({ duration: 0, props: [], type: dragon.AniPropsType.REMOVE });
+            return this;
+        };
+        /**
+         * 缩放动画
+         * @param {number} duration
+         * @param {number} scale
+         * @param {number} [delay]  延迟时间或者动画播放方式
+         * @param {*} [ease]
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.zoom = function (duration, scale, delay, ease) {
+            if (is.fun(delay)) {
+                ease = delay;
+                delay = 0;
+            }
+            else if (is.falsy(delay)) {
+                delay = 0;
+            }
+            var delayNum = (duration - delay) / 2;
+            this.by(delayNum, { scaleX: scale, scaleY: scale }, ease);
+            if (delay > 0) {
+                this.delay(delay);
+            }
+            this.by(delayNum, { scaleX: -scale, scaleY: -scale }, ease);
+            return this;
+        };
+        /**
+         * 动画播放方式：by
+         * @param {number} duration
+         * @param {*} props
+         * @param {*} [ease]
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.by = function (duration, props, ease) {
+            this.mergeEase(props, ease);
+            this._aniInfoArr.push({ duration: duration / 1000, props: props, type: dragon.AniPropsType.BY });
+            return this;
+        };
+        /**
+         * 动画播放类型：延迟 delay
+         * @param {number} time
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.delay = function (duration) {
+            this._aniInfoArr.push({ duration: duration / 1000, props: {}, type: dragon.AniPropsType.DELAY });
+            return this;
+        };
+        /**
+         * 动画回调
+         * @param {Function} callback
+         * @param {Object} [context]
+         * @param {any} args
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.call = function (callback, context) {
+            var args = [];
+            for (var _i = 2; _i < arguments.length; _i++) {
+                args[_i - 2] = arguments[_i];
+            }
+            this._aniInfoArr.push({ duration: 0, props: { callback: callback, context: context }, type: dragon.AniPropsType.CALL });
+            return this;
+        };
+        /**
+         * 闪烁动画
+         * @param {number} duration 动画时间
+         * @param {number} blinks   闪烁的次数
+         * @param {*} [ease]
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.blink = function (duration, blinks, ease) {
+            var delayStep = duration / blinks;
+            var vis = true;
+            for (var i = 0; i < blinks; i++) {
+                this.delay(delayStep);
+                this.setProps({ visible: vis });
+                vis = !vis;
+            }
+            return this;
+        };
+        /**
+         * 淡入淡出动画
+         * @param {number} duration
+         * @param {*} [ease]
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.fadeInOut = function (duration, ease) {
+            this.to(duration / 2, { alpha: 0 }, ease);
+            this.to(duration / 2, { alpha: 1 }, ease);
+            return this;
+        };
+        /**
+         * 播放动画
+         * @param {*} [target=this._target]
+         * @param {boolean} [isLoop]
+         * @returns {dragon.IAnimation}
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.run = function (target, isLoop) {
+            if (target === void 0) { target = this._target; }
+            BaseAnimation.addAnimation(target, this);
+            if (isLoop) {
+                this._timeLine.repeat(-1);
+            }
+            for (var i = 0; i < this._aniInfoArr.length; i++) {
+                var info = this._aniInfoArr[i];
+                var type = info.type;
+                switch (type) {
+                    case dragon.AniPropsType.DELAY://延迟动画
+                        this._timeLine.to(target, info.duration, {});
+                        break;
+                    case dragon.AniPropsType.SET://参数设置
+                        this._timeLine.set(target, info.props);
+                        break;
+                    case dragon.AniPropsType.BY://运动
+                        this._timeLine.fromTo(target, info.duration, this.fromProps(info.props), this.toProps(info.props));
+                        break;
+                    case dragon.AniPropsType.REMOVE://移除
+                        this._timeLine.call(function () {
+                            if (target && target.parent) {
+                                target.parent.remove(target);
+                            }
+                        });
+                        break;
+                    case dragon.AniPropsType.CALL://回调
+                        var callback = info.props['callback'];
+                        var context = info.props['context'];
+                        if (callback) {
+                            this._timeLine.call(callback.call(context));
+                        }
+                        break;
+                    default:
+                        this._timeLine.to(target, info.duration, info.props);
+                        break;
+                }
+            }
+            return this;
+        };
+        BaseAnimation.prototype.shake = function (duration, offsetX, offestY, ease) {
+            return null;
+        };
+        BaseAnimation.prototype.score = function (duration, beginScore, endScore, ease) {
+            return null;
+        };
+        /**
+         * 停止动画（进度设置为1表示完成）
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.prototype.stop = function () {
+            this._timeLine.totalProgress(1);
+            BaseAnimation.removeAnimation(this.target, this);
+        };
+        BaseAnimation.prototype.pause = function () {
+            this._timeLine.pause();
+        };
+        BaseAnimation.prototype.resume = function () {
+            this._timeLine.resume();
+        };
+        BaseAnimation.prototype.destroy = function () {
+            this._timeLine.kill();
+            this._timeLine = null;
+            this._target = null;
+        };
+        /**
+         * 给目标添加动画
+         * @static
+         * @param {*} target
+         * @param {dragon.IAnimation} animation
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.addAnimation = function (target, animation) {
+            if (!target.$__aniId_) {
+                target.$__aniId_ = this._aniId++;
+            }
+            if (!this._aniMap.hasOwnProperty(target.$__aniId_)) {
+                this._aniMap[target.$__aniId_] = [];
+            }
+            this._aniMap[target.$__aniId_].push(animation);
+        };
+        /**
+         * 移除动画目标
+         * @static
+         * @param {*} target
+         * @param {dragon.IAnimation} animation
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.removeAnimation = function (target, animation) {
+            if (!target && target.$__aniId_) {
+                var arr = this._aniMap[target.$__aniId_];
+                if (arr && arr.length > 0) {
+                    var idx = arr.indexOf(animation);
+                    if (idx > -1) {
+                        animation.destroy();
+                        arr.splice(idx, 1);
+                    }
+                    if (!arr.length) {
+                        delete this._aniMap[target.$__aniId_];
+                    }
+                }
+            }
+        };
+        /**
+         * 停止目标动画
+         * @static
+         * @param {*} target
+         * @param {boolean} [remove=true] 是否移除动画
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.stopAnimationByTarget = function (target, remove) {
+            if (remove === void 0) { remove = true; }
+            if (target && target.$__aniId_) {
+                var arr = this._aniMap[target.$__aniId_];
+                if (arr && arr.length) {
+                    if (remove) {
+                        while (arr.length) {
+                            arr.shift().stop();
+                        }
+                        delete this._aniMap[target.$__aniId_];
+                    }
+                    else {
+                        this.pauseAnimationByTarget(target);
+                    }
+                }
+            }
+        };
+        /**
+         * 暂停目标动画
+         * @static
+         * @param {*} target
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.pauseAnimationByTarget = function (target) {
+            if (target && target.$__aniId_) {
+                var arr = this._aniMap[target.$__aniId_];
+                if (arr && arr.length) {
+                    for (var i = 0; i < arr.length; i++) {
+                        var item = arr[i];
+                        item.pause();
+                    }
+                }
+            }
+        };
+        /**
+         * 重启目标动画
+         * @static
+         * @param {*} target
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.resumeAnimationByTarget = function (target) {
+            if (target && target.$__aniId_) {
+                var arr = this._aniMap[target.$__aniId_];
+                if (arr && arr.length) {
+                    for (var i = 0; i < arr.length; i++) {
+                        var item = arr[i];
+                        item.resume();
+                    }
+                }
+            }
+        };
+        /**
+         * 移除目标动画
+         * @static
+         * @param {*} target
+         * @memberof BaseAnimation
+         */
+        BaseAnimation.removeAnimationByTarget = function (target) {
+            if (target && target.$__aniId_) {
+                var arr = this._aniMap[target.$__aniId_];
+                if (arr && arr.length) {
+                    while (arr.length) {
+                        arr.shift().destroy();
+                    }
+                    delete this._aniMap[target.$__aniId_];
+                }
+            }
+        };
+        BaseAnimation.by = function (duration, props, ease) {
+            return new BaseAnimation().by(duration, props, ease);
+        };
+        BaseAnimation.to = function (duration, props, ease) {
+            return new BaseAnimation().to(duration, props, ease);
+        };
+        BaseAnimation.call = function (callback, context) {
+            return new BaseAnimation().call(callback, context);
+        };
+        BaseAnimation._aniMap = []; //存储动画目标与动画对象
+        BaseAnimation._aniId = 1; //动画Id
+        return BaseAnimation;
+    }());
+    dragon.BaseAnimation = BaseAnimation;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 动画信息类型
+     * @export
+     * @enum {number}
+     */
+    var AniPropsType;
+    (function (AniPropsType) {
+        AniPropsType[AniPropsType["DELAY"] = 1] = "DELAY";
+        AniPropsType[AniPropsType["SET"] = 2] = "SET";
+        AniPropsType[AniPropsType["BY"] = 3] = "BY";
+        AniPropsType[AniPropsType["REMOVE"] = 4] = "REMOVE";
+        AniPropsType[AniPropsType["CALL"] = 5] = "CALL";
+    })(AniPropsType = dragon.AniPropsType || (dragon.AniPropsType = {}));
+})(dragon || (dragon = {}));
 var dragon;
 (function (dragon) {
     /**
