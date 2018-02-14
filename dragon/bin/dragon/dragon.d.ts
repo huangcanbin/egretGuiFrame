@@ -199,6 +199,61 @@ declare module dragon {
  */
 declare module dragon {
     /**
+     * 弹框动画基类（可以继承该类自行实现自定义动画）
+     * @export
+     * @class BoxAnimation
+     * @implements {dragon.IUIAnimation}
+     */
+    class BaseBoxAnimation implements dragon.IUIAnimation {
+        private _displayObject;
+        constructor();
+        displayObject: IUIAnimationDisplay;
+        /**
+         * 指定弹框动画
+         * @private
+         * @param {IUIAnimationCallback} callback 回调函数
+         * @param {Function} boxAnimation         弹框动画
+         * @param {Function} maskAnimation        遮罩动画
+         * @memberof BoxAnimation
+         */
+        private runAnimation(callback, boxAnimation, maskAnimation);
+        show(callback: IUIAnimationCallback): void;
+        close(callback: IUIAnimationCallback): void;
+        /**
+         * 弹框显示动画
+         * @param {*} box
+         * @returns {dragon.IAnimation}
+         * @memberof BoxAnimation
+         */
+        getShowBoxAnimation(box: any): dragon.IAnimation;
+        /**
+         * 遮罩显示动画
+         * @param {*} mask
+         * @returns {dragon.IAnimation}
+         * @memberof BoxAnimation
+         */
+        getShowMaskAnimation(mask: any): dragon.IAnimation;
+        /**
+         * 弹框关闭动画
+         * @param {*} box
+         * @returns {dragon.IAnimation}
+         * @memberof BoxAnimation
+         */
+        getCloseBoxAnimation(box: any): dragon.IAnimation;
+        /**
+         * 遮罩关闭动画
+         * @param {*} mask
+         * @returns {dragon.IAnimation}
+         * @memberof BoxAnimation
+         */
+        getCloseMaskAnimation(mask: any): dragon.IAnimation;
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
      * 动画信息类型
      * @export
      * @enum {number}
@@ -244,6 +299,154 @@ declare module dragon {
         setTarget(obj: any): IAnimation;
         resume(): void;
         run(target?: any, isLoop?: boolean): IAnimation;
+    }
+}
+/**
+ * @author Andrew_Huang
+ * UI动画相关接口
+ */
+declare module dragon {
+    /**
+     * UI类型
+     * @export
+     * @enum {number}
+     */
+    enum UI_TYPE {
+        BOX = "box",
+        MASK = "mask",
+    }
+    /**
+     * UI 动画进入方向
+     * @export
+     * @enum {number}
+     */
+    enum ANI_UI_DIRECTION {
+        FROM_RIGT = 1,
+        FROM_LEFT = 2,
+        FROM_TOP = 3,
+        FROM_BOTTOM = 4,
+    }
+    /**
+     * 获取UI动画对象
+     * @export
+     * @interface IUIAnimationDisplay
+     */
+    interface IUIAnimationDisplay {
+        getAnimationDisplay(type?: UI_TYPE): any;
+    }
+    /**
+     * UI动画回调（自定义）
+     * @export
+     * @interface IUIAnimationCallback
+     */
+    interface IUIAnimationCallback {
+        (): void;
+    }
+    /**
+     * UI动画接口
+     * @export
+     * @interface IUIAnimation
+     */
+    interface IUIAnimation {
+        displayObject: IUIAnimationDisplay;
+        show(callback: IUIAnimationCallback): void;
+        close(callback: IUIAnimationCallback): void;
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 普通UI动画（关闭和开启自定义）
+     * @export
+     * @class NoneAnimation
+     * @implements {dragon.IUIAnimation}
+     */
+    class NoneAnimation implements dragon.IUIAnimation {
+        private _displayObject;
+        constructor();
+        displayObject: IUIAnimationDisplay;
+        show(callback: IUIAnimationCallback): void;
+        close(callback: IUIAnimationCallback): void;
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 弹框动画2：缩放式
+     * @export
+     * @class BoxBounceAnimation
+     * @extends {dragon.BaseBoxAnimation}
+     */
+    class BoxBounceAnimation extends dragon.BaseBoxAnimation {
+        getShowBoxAnimation(box: any): dragon.IAnimation;
+        getShowMaskAnimation(mask: any): dragon.IAnimation;
+        getCloseBoxAnimation(box: any): dragon.IAnimation;
+        getCloseMaskAnimation(mask: any): dragon.IAnimation;
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 弹框动画1：透明度变化，从中间放大显示
+     * @export
+     * @class BoxNormalAnimation
+     * @extends {dragon.BaseBoxAnimation}
+     */
+    class BoxNormalAnimation extends dragon.BaseBoxAnimation {
+        getShowBoxAnimation(box: any): dragon.IAnimation;
+        getShowMaskAnimation(mask: any): dragon.IAnimation;
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * UI 动画：左右切换
+     * @export
+     * @class UILeftRightAnimation
+     * @implements {dragon.IUIAnimation}
+     */
+    class UILeftRightAnimation implements dragon.IUIAnimation {
+        private _displayObject;
+        private _width;
+        private _direct;
+        private _callback;
+        constructor(callback?: any, context?: Object);
+        displayObject: dragon.IUIAnimationDisplay;
+        direct: dragon.ANI_UI_DIRECTION;
+        show(callback: IUIAnimationCallback): void;
+        close(callback: IUIAnimationCallback): void;
+        private getOffsetByDirect();
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * UI 动画：上下切换
+     * @export
+     * @class UILeftRightAnimation
+     * @implements {dragon.IUIAnimation}
+     */
+    class UITopBottomAnimation implements dragon.IUIAnimation {
+        private _displayObject;
+        private _height;
+        private _direct;
+        private _callback;
+        constructor(callback?: any, context?: Object);
+        displayObject: dragon.IUIAnimationDisplay;
+        direct: dragon.ANI_UI_DIRECTION;
+        show(callback: IUIAnimationCallback): void;
+        close(callback: IUIAnimationCallback): void;
+        private getOffsetByDirect();
     }
 }
 declare module dragon {
@@ -782,6 +985,63 @@ declare module dragon {
      * @param name 待移除侦听的名称
      */
     function removePullObjectByName(name: string): void;
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 对象池
+     * @export
+     * @class Pool
+     * @template T
+     */
+    class Pool<T> {
+        private _totalArr;
+        private _useArr;
+        private _leftArr;
+        private _type;
+        private static _poolMap;
+        constructor(type: any);
+        /**
+         * 回收对象，当不需要使用对象池创建的对象时，使用该方法回收
+         * @param {T} inst
+         * @memberof Pool
+         */
+        push(inst: T): void;
+        /**
+         * 拉取对象，如果对象池不存在任何可供使用的对象，则会创建出新的对象
+         * @param {any} args
+         * @returns {T}
+         * @memberof Pool
+         */
+        pop(...args: any[]): T;
+        /**
+         * 获取指定类型的对象池
+         * @static
+         * @template T
+         * @param {T} type    指定的类型
+         * @returns {Pool<T>} 类型对象池
+         * @memberof Pool
+         */
+        static getPool<T>(type: T): Pool<T>;
+        /**
+         * 获取指定分组的类型对象池
+         * @static
+         * @template T
+         * @param {string} name 组名
+         * @param {T} type      指定类型
+         * @returns {Pool<T>}   类型对象池
+         * @memberof Pool
+         */
+        static getTypePool<T>(name: string, type: T): Pool<T>;
+    }
+    function getPool<T>(type: {
+        new (): T;
+    }): Pool<T>;
+    function getTypePool<T>(name: string, type: {
+        new (): T;
+    }): Pool<T>;
 }
 /**
  * @author Andrew_Huang

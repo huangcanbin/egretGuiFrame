@@ -238,6 +238,7 @@ var dragon;
          * @memberof BaseAnimation
          */
         BaseAnimation.prototype.run = function (target, isLoop) {
+            var _this = this;
             if (target === void 0) { target = this._target; }
             BaseAnimation.addAnimation(target, this);
             if (isLoop) {
@@ -275,6 +276,12 @@ var dragon;
                         break;
                 }
             }
+            if (!isLoop) {
+                this._timeLine.call(function () {
+                    BaseAnimation.removeAnimation(target, _this);
+                });
+            }
+            this._isRunning = true;
             return this;
         };
         BaseAnimation.prototype.shake = function (duration, offsetX, offestY, ease) {
@@ -436,6 +443,116 @@ var dragon;
 var dragon;
 (function (dragon) {
     /**
+     * 弹框动画基类（可以继承该类自行实现自定义动画）
+     * @export
+     * @class BoxAnimation
+     * @implements {dragon.IUIAnimation}
+     */
+    var BaseBoxAnimation = /** @class */ (function () {
+        function BaseBoxAnimation() {
+        }
+        Object.defineProperty(BaseBoxAnimation.prototype, "displayObject", {
+            get: function () {
+                return this._displayObject;
+            },
+            set: function (value) {
+                this._displayObject = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 指定弹框动画
+         * @private
+         * @param {IUIAnimationCallback} callback 回调函数
+         * @param {Function} boxAnimation         弹框动画
+         * @param {Function} maskAnimation        遮罩动画
+         * @memberof BoxAnimation
+         */
+        BaseBoxAnimation.prototype.runAnimation = function (callback, boxAnimation, maskAnimation) {
+            var box = this._displayObject.getAnimationDisplay(dragon.UI_TYPE.BOX);
+            var mask = this._displayObject.getAnimationDisplay(dragon.UI_TYPE.MASK);
+            var aniArr = [];
+            if (box) {
+                var showBoxAnimation = boxAnimation.call(this, box);
+                if (showBoxAnimation) {
+                    aniArr.push(showBoxAnimation);
+                }
+            }
+            if (mask) {
+                var showMaskAnimation = maskAnimation.call(this, mask);
+                if (showMaskAnimation) {
+                    aniArr.push(showMaskAnimation);
+                }
+            }
+            if (!aniArr.length) {
+                if (callback) {
+                    callback();
+                }
+            }
+            else {
+                for (var i = 0; i < aniArr.length; i++) {
+                    if (i == 0) {
+                        aniArr[i].call(callback);
+                    }
+                    if (!aniArr[i].isRunning) {
+                        aniArr[i].run();
+                    }
+                }
+            }
+        };
+        BaseBoxAnimation.prototype.show = function (callback) {
+            this.runAnimation(callback, this.getShowBoxAnimation, this.getShowMaskAnimation);
+        };
+        BaseBoxAnimation.prototype.close = function (callback) {
+            this.runAnimation(callback, this.getCloseBoxAnimation, this.getCloseMaskAnimation);
+        };
+        /**
+         * 弹框显示动画
+         * @param {*} box
+         * @returns {dragon.IAnimation}
+         * @memberof BoxAnimation
+         */
+        BaseBoxAnimation.prototype.getShowBoxAnimation = function (box) {
+            return null;
+        };
+        /**
+         * 遮罩显示动画
+         * @param {*} mask
+         * @returns {dragon.IAnimation}
+         * @memberof BoxAnimation
+         */
+        BaseBoxAnimation.prototype.getShowMaskAnimation = function (mask) {
+            return null;
+        };
+        /**
+         * 弹框关闭动画
+         * @param {*} box
+         * @returns {dragon.IAnimation}
+         * @memberof BoxAnimation
+         */
+        BaseBoxAnimation.prototype.getCloseBoxAnimation = function (box) {
+            return null;
+        };
+        /**
+         * 遮罩关闭动画
+         * @param {*} mask
+         * @returns {dragon.IAnimation}
+         * @memberof BoxAnimation
+         */
+        BaseBoxAnimation.prototype.getCloseMaskAnimation = function (mask) {
+            return null;
+        };
+        return BaseBoxAnimation;
+    }());
+    dragon.BaseBoxAnimation = BaseBoxAnimation;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
      * 动画信息类型
      * @export
      * @enum {number}
@@ -448,6 +565,280 @@ var dragon;
         AniPropsType[AniPropsType["REMOVE"] = 4] = "REMOVE";
         AniPropsType[AniPropsType["CALL"] = 5] = "CALL";
     })(AniPropsType = dragon.AniPropsType || (dragon.AniPropsType = {}));
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ * UI动画相关接口
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * UI类型
+     * @export
+     * @enum {number}
+     */
+    var UI_TYPE;
+    (function (UI_TYPE) {
+        UI_TYPE["BOX"] = "box";
+        UI_TYPE["MASK"] = "mask"; //遮罩
+    })(UI_TYPE = dragon.UI_TYPE || (dragon.UI_TYPE = {}));
+    /**
+     * UI 动画进入方向
+     * @export
+     * @enum {number}
+     */
+    var ANI_UI_DIRECTION;
+    (function (ANI_UI_DIRECTION) {
+        ANI_UI_DIRECTION[ANI_UI_DIRECTION["FROM_RIGT"] = 1] = "FROM_RIGT";
+        ANI_UI_DIRECTION[ANI_UI_DIRECTION["FROM_LEFT"] = 2] = "FROM_LEFT";
+        ANI_UI_DIRECTION[ANI_UI_DIRECTION["FROM_TOP"] = 3] = "FROM_TOP";
+        ANI_UI_DIRECTION[ANI_UI_DIRECTION["FROM_BOTTOM"] = 4] = "FROM_BOTTOM";
+    })(ANI_UI_DIRECTION = dragon.ANI_UI_DIRECTION || (dragon.ANI_UI_DIRECTION = {}));
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 普通UI动画（关闭和开启自定义）
+     * @export
+     * @class NoneAnimation
+     * @implements {dragon.IUIAnimation}
+     */
+    var NoneAnimation = /** @class */ (function () {
+        function NoneAnimation() {
+        }
+        Object.defineProperty(NoneAnimation.prototype, "displayObject", {
+            get: function () {
+                return this._displayObject;
+            },
+            set: function (value) {
+                this._displayObject = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        NoneAnimation.prototype.show = function (callback) {
+            if (callback) {
+                callback();
+            }
+        };
+        NoneAnimation.prototype.close = function (callback) {
+            if (callback) {
+                callback();
+            }
+        };
+        return NoneAnimation;
+    }());
+    dragon.NoneAnimation = NoneAnimation;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 弹框动画2：缩放式
+     * @export
+     * @class BoxBounceAnimation
+     * @extends {dragon.BaseBoxAnimation}
+     */
+    var BoxBounceAnimation = /** @class */ (function (_super) {
+        __extends(BoxBounceAnimation, _super);
+        function BoxBounceAnimation() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        BoxBounceAnimation.prototype.getShowBoxAnimation = function (box) {
+            box.scaleX = box.scaleY = 0;
+            box.alpha = 0;
+            dragon.BaseAnimation.removeAnimationByTarget(box);
+            return dragon.BaseAnimation.to(300, { scaleX: 1, scaleY: 1, alpha: 1 }, Back.easeInOut).run(box);
+        };
+        BoxBounceAnimation.prototype.getShowMaskAnimation = function (mask) {
+            var alpha = mask.alpha ? mask.alpha : 0.6;
+            mask.alpha = 0;
+            return dragon.BaseAnimation.to(300, { alpha: alpha }).run(mask);
+        };
+        BoxBounceAnimation.prototype.getCloseBoxAnimation = function (box) {
+            dragon.BaseAnimation.removeAnimationByTarget(box);
+            return dragon.BaseAnimation.to(300, { scaleX: 0, scaleY: 0, alpha: 0 }, Back.easeIn).run(box);
+        };
+        BoxBounceAnimation.prototype.getCloseMaskAnimation = function (mask) {
+            return dragon.BaseAnimation.to(300, { alpha: 0 }).run(mask);
+        };
+        return BoxBounceAnimation;
+    }(dragon.BaseBoxAnimation));
+    dragon.BoxBounceAnimation = BoxBounceAnimation;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 弹框动画1：透明度变化，从中间放大显示
+     * @export
+     * @class BoxNormalAnimation
+     * @extends {dragon.BaseBoxAnimation}
+     */
+    var BoxNormalAnimation = /** @class */ (function (_super) {
+        __extends(BoxNormalAnimation, _super);
+        function BoxNormalAnimation() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        BoxNormalAnimation.prototype.getShowBoxAnimation = function (box) {
+            box.scaleX = box.scaleY = 0;
+            box.alpha = 0;
+            dragon.BaseAnimation.removeAnimationByTarget(box);
+            return dragon.BaseAnimation.to(150, { alpha: 1, scaleX: 1, scaleY: 1 }).run(box);
+        };
+        BoxNormalAnimation.prototype.getShowMaskAnimation = function (mask) {
+            var alpha = mask.alpha ? mask.alpha : 0.6;
+            mask.alpha = 0;
+            return dragon.BaseAnimation.to(150, { alpha: alpha }).run(mask);
+        };
+        return BoxNormalAnimation;
+    }(dragon.BaseBoxAnimation));
+    dragon.BoxNormalAnimation = BoxNormalAnimation;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * UI 动画：左右切换
+     * @export
+     * @class UILeftRightAnimation
+     * @implements {dragon.IUIAnimation}
+     */
+    var UILeftRightAnimation = /** @class */ (function () {
+        function UILeftRightAnimation(callback, context) {
+            if (callback === void 0) { callback = null; }
+            if (context === void 0) { context = null; }
+            this._width = dragon.stage.width; //UI 高度
+            this._direct = dragon.ANI_UI_DIRECTION.FROM_RIGT; //默认初始方向
+            this._width = dragon.stage.width;
+            this._callback = callback;
+        }
+        Object.defineProperty(UILeftRightAnimation.prototype, "displayObject", {
+            get: function () {
+                return this._displayObject;
+            },
+            set: function (value) {
+                this._displayObject = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(UILeftRightAnimation.prototype, "direct", {
+            set: function (value) {
+                this._direct = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        UILeftRightAnimation.prototype.show = function (callback) {
+            var displayObject = this.displayObject.getAnimationDisplay();
+            dragon.BaseAnimation.removeAnimationByTarget(displayObject);
+            displayObject.x = this.getOffsetByDirect();
+            if (this._callback) {
+                callback = this._callback;
+            }
+            if (callback) {
+                dragon.BaseAnimation.to(200, { x: 0 }, Back.easeOut).call(callback, this).run(displayObject);
+            }
+            else {
+                dragon.BaseAnimation.to(200, { x: 0 }, Back.easeOut).run(displayObject);
+            }
+        };
+        UILeftRightAnimation.prototype.close = function (callback) {
+            var displayObject = this.displayObject.getAnimationDisplay();
+            dragon.BaseAnimation.removeAnimationByTarget(displayObject);
+            var aimX = -this.getOffsetByDirect();
+            dragon.BaseAnimation.to(200, { x: aimX }, Back.easeOut).call(callback, this).run(displayObject);
+        };
+        UILeftRightAnimation.prototype.getOffsetByDirect = function () {
+            if (this._direct == dragon.ANI_UI_DIRECTION.FROM_RIGT) {
+                return this._width;
+            }
+            else if (this._direct == dragon.ANI_UI_DIRECTION.FROM_LEFT) {
+                return -this._width;
+            }
+        };
+        return UILeftRightAnimation;
+    }());
+    dragon.UILeftRightAnimation = UILeftRightAnimation;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * UI 动画：上下切换
+     * @export
+     * @class UILeftRightAnimation
+     * @implements {dragon.IUIAnimation}
+     */
+    var UITopBottomAnimation = /** @class */ (function () {
+        function UITopBottomAnimation(callback, context) {
+            if (callback === void 0) { callback = null; }
+            if (context === void 0) { context = null; }
+            this._height = dragon.stage.height; //UI 宽度
+            this._direct = dragon.ANI_UI_DIRECTION.FROM_TOP; //默认初始方向
+            this._height = dragon.stage.width;
+            this._callback = callback;
+        }
+        Object.defineProperty(UITopBottomAnimation.prototype, "displayObject", {
+            get: function () {
+                return this._displayObject;
+            },
+            set: function (value) {
+                this._displayObject = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(UITopBottomAnimation.prototype, "direct", {
+            set: function (value) {
+                this._direct = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        UITopBottomAnimation.prototype.show = function (callback) {
+            var displayObject = this.displayObject.getAnimationDisplay();
+            dragon.BaseAnimation.removeAnimationByTarget(displayObject);
+            displayObject.x = this.getOffsetByDirect();
+            if (this._callback) {
+                callback = this._callback;
+            }
+            if (callback) {
+                dragon.BaseAnimation.to(200, { y: 0 }, Back.easeOut).call(callback, this).run(displayObject);
+            }
+            else {
+                dragon.BaseAnimation.to(200, { y: 0 }, Back.easeOut).run(displayObject);
+            }
+        };
+        UITopBottomAnimation.prototype.close = function (callback) {
+            var displayObject = this.displayObject.getAnimationDisplay();
+            dragon.BaseAnimation.removeAnimationByTarget(displayObject);
+            var aimY = -this.getOffsetByDirect();
+            dragon.BaseAnimation.to(200, { y: aimY }, Back.easeOut).call(callback, this).run(displayObject);
+        };
+        UITopBottomAnimation.prototype.getOffsetByDirect = function () {
+            if (this._direct == dragon.ANI_UI_DIRECTION.FROM_TOP) {
+                return -this._height;
+            }
+            else if (this._direct == dragon.ANI_UI_DIRECTION.FROM_BOTTOM) {
+                return this._height;
+            }
+        };
+        return UITopBottomAnimation;
+    }());
+    dragon.UITopBottomAnimation = UITopBottomAnimation;
 })(dragon || (dragon = {}));
 var dragon;
 (function (dragon) {
@@ -1545,6 +1936,102 @@ var dragon;
         dragon.singleton(PullObject).removeObserverByName(name);
     }
     dragon.removePullObjectByName = removePullObjectByName;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 对象池
+     * @export
+     * @class Pool
+     * @template T
+     */
+    var Pool = /** @class */ (function () {
+        function Pool(type) {
+            this._totalArr = []; //总的对象组列表
+            this._useArr = []; //正在使用的对象组列表
+            this._leftArr = []; //剩余可以使用的对象组列表
+            this._type = type;
+        }
+        /**
+         * 回收对象，当不需要使用对象池创建的对象时，使用该方法回收
+         * @param {T} inst
+         * @memberof Pool
+         */
+        Pool.prototype.push = function (inst) {
+            dragon.array.remove(this._useArr, inst);
+            if (this._leftArr.indexOf(inst) == -1) {
+                this._leftArr.push(inst);
+            }
+        };
+        /**
+         * 拉取对象，如果对象池不存在任何可供使用的对象，则会创建出新的对象
+         * @param {any} args
+         * @returns {T}
+         * @memberof Pool
+         */
+        Pool.prototype.pop = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            if (!this._leftArr.length) {
+                var inst = new this._type();
+                this._leftArr.push(inst);
+                this._totalArr.push(inst);
+            }
+            var ret = this._leftArr.shift();
+            if (is.fun(ret.init)) {
+                ret.init.apply(ret, args);
+            }
+            this._useArr.push(ret);
+            return ret;
+        };
+        /**
+         * 获取指定类型的对象池
+         * @static
+         * @template T
+         * @param {T} type    指定的类型
+         * @returns {Pool<T>} 类型对象池
+         * @memberof Pool
+         */
+        Pool.getPool = function (type) {
+            var typeId = dragon.getTypeId(type);
+            if (!this._poolMap.hasOwnProperty(typeId)) {
+                this._poolMap[typeId] = new Pool(type);
+            }
+            return this._poolMap[typeId];
+        };
+        /**
+         * 获取指定分组的类型对象池
+         * @static
+         * @template T
+         * @param {string} name 组名
+         * @param {T} type      指定类型
+         * @returns {Pool<T>}   类型对象池
+         * @memberof Pool
+         */
+        Pool.getTypePool = function (name, type) {
+            var typeId = name + dragon.getTypeId(type);
+            if (!this._poolMap.hasOwnProperty(typeId)) {
+                this._poolMap[typeId] = new Pool(type);
+            }
+            return this._poolMap[typeId];
+        };
+        Pool._poolMap = {};
+        return Pool;
+    }());
+    dragon.Pool = Pool;
+    function getPool(type) {
+        return Pool.getPool(type);
+    }
+    dragon.getPool = getPool;
+    function getTypePool(name, type) {
+        return Pool.getTypePool(name, type);
+    }
+    dragon.getTypePool = getTypePool;
 })(dragon || (dragon = {}));
 /**
  * @author Andrew_Huang
