@@ -35,6 +35,7 @@ module dragon
 
         private _name: string;
         private _state: OperateState;
+        private _complete: boolean = false;
 
         public get state(): OperateState
         {
@@ -58,12 +59,12 @@ module dragon
 
         public setComplete(): void
         {
-
+            this._complete = true;
         }
 
         protected getIsComplete(): boolean
         {
-            return true;
+            return this._complete;
         }
 
         public get isComplete(): boolean

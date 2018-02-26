@@ -27,6 +27,11 @@ module dragon
         exit
     }
 
+    /**
+     * 组件钩子
+     * @export
+     * @interface IComponentHook
+     */
     export interface IComponentHook
     {
         setData(data: any, type?: any): void;
@@ -237,6 +242,122 @@ module dragon
         protected dataChanged(): void
         {
 
+        }
+
+        /**
+         * 添加操作
+         * @param {IComponentOperate<any>} operate 
+         * @returns {BaseComponent} 
+         * @memberof BaseComponent
+         */
+        public addOperate(operate: IComponentOperate<any>): BaseComponent
+        {
+            if (this.$_componentState == OperateState.enter)
+            {
+                operate.state = OperateState.enter;
+                operate.enter(this);
+            } else
+            {
+                operate.state = OperateState.exit;
+            }
+            if (this._hook)
+            {
+                this._hook.addOperate(operate);
+            }
+            this._operates.push(operate);
+            return this;
+        }
+
+        /**
+         * 移除操作
+         * @param {IComponentOperate<any>} operate 
+         * @memberof BaseComponent
+         */
+        public removeOperate(operate: IComponentOperate<any>): void
+        {
+            let idx: number = this._operates.indexOf(operate);
+            if (idx > -1)
+            {
+                operate.state = OperateState.exit;
+                operate.exit(this);
+                this._operates.splice(idx, 1);
+            }
+        }
+
+        /**
+         * 根据操作名删除操作
+         * @param {string} name 
+         * @memberof BaseComponent
+         */
+        public removeOperateByName(name: string): void
+        {
+            for (let i: number = this._operates.length - 1; i >= 0; i--)
+            {
+                if (this._operates[i].getName() == name)
+                {
+                    this.removeOperate(this._operates[i]);
+                }
+            }
+        }
+
+        /**
+         * 根据操作名获取操作列表
+         * @param {string} name 
+         * @returns {IComponentOperate<any>[]} 
+         * @memberof BaseComponent
+         */
+        public getOperateByName(name: string): IComponentOperate<any>[]
+        {
+            let result = [];
+            for (let i: number = 0; i < this._operates.length; i++)
+            {
+                if (this._operates[i].getName() == name)
+                {
+                    result.push(this._operates[i]);
+                }
+            }
+            return result;
+        }
+
+        /**
+         * 根据类型名获取操作列表
+         * @param {string} type 
+         * @returns {IComponentOperate<any>[]} 
+         * @memberof BaseComponent
+         */
+        public getOperateByType(type: string): IComponentOperate<any>[]
+        {
+            let result = [];
+            for (let i: number = 0; i < this._operates.length; i++)
+            {
+                if (this._operates[i].type == type)
+                {
+                    result.push(this._operates[i]);
+                }
+            }
+            return result;
+        }
+
+        public operatesIsComplete(): boolean
+        {
+            return this._operates.every(operate => operate.isComplete);
+        }
+
+        public setOperatesComplete(): void
+        {
+            this._operates.forEach(operate => operate.setComplete());
+        }
+
+        /**
+         * 清理所有操作
+         * @memberof BaseComponent
+         */
+        public clearOperate(): void
+        {
+            while (this._operates.length > 0)
+            {
+                this.removeOperate(this._operates[0]);
+            }
         }
 
         /**

@@ -3,6 +3,19 @@
  */
 module dragon
 {
+    export enum HookAction
+    {
+        SET_DATA,
+        ADD_OPERATE
+    }
+    export interface IHookItemInfo
+    {
+        action: HookAction,
+        data: any,
+        type?: any;
+        operate?: IComponentOperate<any>,
+    }
+
     /**
      * UI 记录Item
      * @export
@@ -72,10 +85,10 @@ module dragon
         static REMOVE_COMPONENT: string = "remove_component";
         static ADD_COMMON: string = "add_common";
         static REMOVE_COMMON: string = "remove_common";
-        private _component: dragon.BaseComponent;
+        private _component: BaseComponent;
         private _group: string;
 
-        public get component(): dragon.BaseComponent
+        public get component(): BaseComponent
         {
             return this._component;
         }
@@ -85,7 +98,7 @@ module dragon
             return this._group;
         }
 
-        constructor(type: string, component: dragon.BaseComponent, group: string = null)
+        constructor(type: string, component: BaseComponent, group: string = null)
         {
             super(type);
             this._component = component;
@@ -107,6 +120,14 @@ module dragon
         public pushHistory(type: any, args: any[], isUnder: boolean, hookList: any[] = []): void
         {
             this._history.push({ type, args, isUnder, hookList });
+        }
+
+        public getLastItem(): UIHistoryItem
+        {
+            if (this.count())
+            {
+                return this._history[this.count() - 1];
+            }
         }
 
         public count(): number
@@ -140,7 +161,7 @@ module dragon
     export class UI extends fairygui.UIContainer
     {
         private _scene: fairygui.UIContainer;    //场景层
-        private _common: fairygui.UIContainer;   // 公共UI层
+        private _common: fairygui.UIContainer;   //公共UI层
         private _panel: fairygui.UIContainer;    //面板层
         private _menu: fairygui.UIContainer;     //菜单层
         private _topScene: fairygui.UIContainer; //顶层场景（如加载界面）
@@ -152,7 +173,7 @@ module dragon
         private _panelInstanceMap: any = {};     //面板实例映射
         private _currentPanel: any = null;       //当前面板
         private _sequenceBoxMap: any = {};       //弹框序列映射
-        private _sceneInst: dragon.BaseComponent;//场景实例
+        private _sceneInst: BaseComponent;       //场景实例
         private _menuInst: any;                  //菜单实例
 
         public constructor()
@@ -193,7 +214,7 @@ module dragon
          * @param {*} args      参数列表
          * @memberof UI
          */
-        public injectPanel(name: string, type: any, args: any): void
+        private injectPanel(name: string, type: any, args: any): void
         {
             this._panelTypeMap[name] = { name, type, args };
         }
@@ -238,10 +259,10 @@ module dragon
         /**
          * 设置面板隐藏
          * @private
-         * @param {dragon.BaseComponent} panel 
+         * @param {BaseComponent} panel 
          * @memberof UI
          */
-        private setPanelHide(panel: dragon.BaseComponent): void
+        private setPanelHide(panel: BaseComponent): void
         {
             if (this._currentPanel && this._currentPanel == panel)
             {
@@ -272,11 +293,11 @@ module dragon
         /**
          * 退出，执行相关动画与移除操作
          * @private
-         * @param {dragon.BaseComponent} component 
+         * @param {BaseComponent} component 
          * @param {boolean} remove 
          * @memberof UI
          */
-        private onExit(component: dragon.BaseComponent, remove: boolean): void
+        private onExit(component: BaseComponent, remove: boolean): void
         {
             if (component.animation)
             {
@@ -286,7 +307,7 @@ module dragon
                     if (remove)
                     {
                         component.destroyData();
-                        dragon.Display.removeFromParent(component, true);
+                        Display.removeFromParent(component, true);
                     }
                 });
             } else
@@ -294,7 +315,7 @@ module dragon
                 if (remove)
                 {
                     component.destroyData();
-                    dragon.Display.removeFromParent(component, true);
+                    Display.removeFromParent(component, true);
                 }
             }
         }
@@ -302,10 +323,10 @@ module dragon
         /**
          * 进入，执行相关动画操作
          * @private
-         * @param {dragon.BaseComponent} component 
+         * @param {BaseComponent} component 
          * @memberof UI
          */
-        private onEnter(component: dragon.BaseComponent): void
+        private onEnter(component: BaseComponent): void
         {
             if (component.animation)
             {
@@ -323,7 +344,7 @@ module dragon
             }
         }
 
-        private showAnimation(component: dragon.BaseComponent): void
+        private showAnimation(component: BaseComponent): void
         {
             egret.callLater(() =>
             {
@@ -366,14 +387,14 @@ module dragon
         }
 
         /**
-         * 显示面板
+         * 显示面板（面板名为字符串）
          * @private
          * @param {string} name 
          * @param {*} args 
          * @returns {*} 
          * @memberof UI
          */
-        private showPanel(name: string, args: any): any
+        private _showPanel(name: string, args: any): any
         {
             this.setPanelHide(this._currentPanel);
             if (!this._panelInstanceMap.hasOwnProperty(name))
@@ -382,7 +403,7 @@ module dragon
                 let inst = new info.type(...info.args);
                 this._panelInstanceMap[name] = inst;
                 inst.componentName = name;
-                dragon.Display.setFullDisplay(inst);
+                Display.setFullDisplay(inst);
                 this._panel.addChild(inst);
             }
             this._currentPanel = this._panelInstanceMap[name];
@@ -391,9 +412,48 @@ module dragon
             {
                 this._currentPanel.setArgs(...args);
             }
-            this.setAnimation(dragon.getSetting().PanelAnimation, this._currentPanel);
+            this.setAnimation(getSetting().PanelAnimation, this._currentPanel);
             this.dispatchEvent(new UIEvent(UIEvent.SHOW_PANEL, this._currentPanel));
             return this._currentPanel;
+        }
+
+        /**
+         * 添加面板层（面板名为非字符串）
+         * @private
+         * @param {*} panelType 
+         * @param {*} args 
+         * @returns {BaseComponent} 
+         * @memberof UI
+         */
+        private _addPanel(panelType: any, args: any): BaseComponent
+        {
+            this.hidePanel(this._currentPanel);
+            let panelInst = this.getTypeInst(panelType, getSetting().PanelAnimation, args, UIType.PANEL);
+            Display.setFullDisplay(panelInst);
+            this._panel.addChild(panelInst);
+            this._currentPanel = panelInst;
+            this.dispatchEvent(new UIEvent(UIEvent.SHOW_PANEL, panelInst));
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, panelInst));
+            return panelInst;
+        }
+
+        /**
+         * 显示面板
+         * @private
+         * @param {*} panel 
+         * @param {*} args 
+         * @returns {BaseComponent} 
+         * @memberof UI
+         */
+        private showPanel(panel: any, args: any): BaseComponent
+        {
+            if (is.string(panel))
+            {
+                return this._showPanel(panel, args);
+            } else
+            {
+                return this._addPanel(panel, args);
+            }
         }
 
         /**
@@ -403,17 +463,17 @@ module dragon
          * @param {string} animation  动画
          * @param {any[]} args        参数
          * @param {UIType} uiType     UI类型
-         * @returns {dragon.BaseComponent} 
+         * @returns {BaseComponent} 
          * @memberof UI
          */
-        private getTypeInst(type: any, animation: string, args: any[], uiType: UIType): dragon.BaseComponent
+        private getTypeInst(type: any, animation: string, args: any[], uiType: UIType): BaseComponent
         {
-            let inst: dragon.BaseComponent = null;
+            let inst: BaseComponent = null;
             if (typeof type == 'string')
             {
                 if (uiType == UIType.BOX)
                 {
-                    type = dragon.getDefinitionType(dragon.getSetting().BoxClass, dragon.BaseComponent);
+                    type = dragon.getDefinitionType(getSetting().BoxClass, BaseComponent);
                 } else
                 {
                     type = dragon.BaseComponent;
@@ -430,7 +490,7 @@ module dragon
                     inst.setArgs(args);
                 }
             }
-            if (egret.is(inst, 'dragon.BaseComponent'))
+            if (egret.is(inst, 'BaseComponent'))
             {
                 inst.setType(uiType);
             }
@@ -453,7 +513,7 @@ module dragon
                 this.remove(this._menuInst);
             }
             let menuInst = this.getTypeInst(menuTtype, null, args, dragon.UIType.MENU);
-            dragon.Display.setFullDisplay(menuInst);
+            Display.setFullDisplay(menuInst);
             this._menuInst = menuInst;
             this._menuInst.bottom = 0;
             this._menu.addChild(this._menuInst);
@@ -466,13 +526,13 @@ module dragon
          * @private
          * @param {*} guideType 
          * @param {*} args 
-         * @returns {dragon.BaseComponent} 
+         * @returns {BaseComponent} 
          * @memberof UI
          */
-        private addGuide(guideType: any, args: any): dragon.BaseComponent
+        private addGuide(guideType: any, args: any): BaseComponent
         {
             let guideInst = this.getTypeInst(guideType, null, args, dragon.UIType.GUIDE);
-            dragon.Display.setFullDisplay(guideInst);
+            Display.setFullDisplay(guideInst);
             this._guide.addChild(guideInst);
             this.dispatchEvent(new UIEvent(UIEvent.ADD_GUIDE, guideInst));
             this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, guideInst));
@@ -484,17 +544,116 @@ module dragon
          * @private
          * @param {*} boxType 
          * @param {*} args 
-         * @returns {dragon.BaseComponent} 
+         * @returns {BaseComponent} 
          * @memberof UI
          */
-        private addBox(boxType: any, args: any): dragon.BaseComponent
+        private addBox(boxType: any, args: any): BaseComponent
         {
-            let boxInst = this.getTypeInst(boxType, dragon.getSetting().BoxAnimation, args, dragon.UIType.BOX);
-            dragon.Display.setFullDisplay(boxInst);
+            let boxInst = this.getTypeInst(boxType, getSetting().BoxAnimation, args, UIType.BOX);
+            Display.setFullDisplay(boxInst);
             this._box.addChild(boxInst);
             this.dispatchEvent(new UIEvent(UIEvent.ADD_BOX, boxInst));
             this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, boxInst));
             return boxInst;
+        }
+
+        /**
+         * 添加通用普通界面
+         * @private
+         * @param {*} commonType 
+         * @param {*} args 
+         * @memberof UI
+         */
+        private addCommon(commonType: any, args: any): void
+        {
+            let commonInst = this.getTypeInst(commonType, null, args, UIType.COMMON);
+            Display.setFullDisplay(commonInst);
+            this._common.addChild(commonInst);
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMMON, commonInst));
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, commonInst));
+        }
+
+        /**
+         * 添加tips
+         * @private
+         * @param {*} tooltipType 
+         * @param {*} args 
+         * @memberof UI
+         */
+        private addTooltip(tooltipType: any, args: any): void
+        {
+            let tooltipInst = this.getTypeInst(tooltipType, null, args, UIType.TOOLTIP);
+            Display.setFullDisplay(tooltipInst);
+            this._tooltip.addChild(tooltipInst);
+            if (egret.is(tooltipInst, 'dragon.BaseComponent'))
+            {
+                this.dispatchEvent(new UIEvent(UIEvent.ADD_TOOLTIP, tooltipInst));
+                this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, tooltipInst));
+            }
+        }
+
+        /**
+         * 添加场景
+         * @private
+         * @param {*} sceneType 
+         * @param {*} args 
+         * @returns {BaseComponent} 
+         * @memberof UI
+         */
+        private runScene(sceneType: any, args: any): BaseComponent
+        {
+            if (is.truthy(this._sceneInst))
+            {
+                this.remove(this._sceneInst, null, false);
+            }
+            let result = this.addScene(sceneType, true, args);
+            return result;
+        }
+
+        /**
+         * 添加定级场景
+         * @private
+         * @param {*} sceneType 
+         * @param {*} args 
+         * @returns {BaseComponent} 
+         * @memberof UI
+         */
+        private runTopScene(sceneType: any, args: any): BaseComponent
+        {
+            if (is.truthy(this._sceneInst))
+            {
+                this.remove(this._sceneInst, null, false);
+            }
+            let result = this.addScene(sceneType, true, args);
+            return result;
+        }
+
+        /**
+         * 添加场景（普通场景和顶级场景）
+         * @private
+         * @param {*} sceneType 
+         * @param {boolean} isUnderScene 
+         * @param {*} args 
+         * @returns {BaseComponent} 
+         * @memberof UI
+         */
+        private addScene(sceneType: any, isUnderScene: boolean, args: any): BaseComponent
+        {
+            this.sceneHistory.pushHistory(this.sceneHistory, args, isUnderScene);
+            let sceneInst = this.getTypeInst(sceneType, getSetting().SceneAnimation, args, UIType.SCENE);
+            Display.setFullDisplay(sceneInst);
+            if (isUnderScene)
+            {
+                this._scene.addChild(sceneInst);
+            } else
+            {
+                this._topScene.addChild(sceneInst);
+            }
+            this._sceneInst.setHistoryComponent(true);
+            this._menu.visible = isUnderScene;
+            this.dispatchEvent(new UIEvent(UIEvent.RUN_SCENE, sceneInst));
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, sceneInst));
+            return sceneInst;
         }
 
         /**
@@ -507,7 +666,274 @@ module dragon
          */
         private remove(instance: any, isHistory: boolean = null, checkHistory: boolean = true): void
         {
+            let gotoHistory = isHistory;
+            if (!isHistory && instance.isHistoryComponent())
+            {
+                gotoHistory = true;
+            }
+            if (instance.isType(UIType.BOX) === true)
+            {
+                this.onExit(instance, true);
+                if (checkHistory)
+                {
+                    this.checkHistory(gotoHistory, this.boxHistory, (item) =>
+                    {
+                        this.addHistoryBox(item.type, item.args);
+                    });
+                }
+            } else if (instance.isType(UIType.SCENE) === true)
+            {
+                this.onExit(instance, true);
+                if (checkHistory)
+                {
+                    this.checkHistory(gotoHistory, this.sceneHistory, (item) =>
+                        this.addScene(item.type, item.isUnder, item.args)
+                    );
+                }
+            } else if (instance.isType(UIType.PANEL) === true)
+            {
+                this.hidePanel(instance);
+                if (checkHistory)
+                {
+                    this.checkHistory(gotoHistory, this.panelHistory, (item) =>
+                    {
+                        this.resetHookList(this.showHistoryPanel(item.type, item.args), item.hookList);
+                    });
+                }
+            } else
+            {
+                this.onExit(instance, true);
+            }
 
+            if (instance.isType(UIType.BOX) === true)
+            {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_BOX, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+                this.onRemoveBox(instance);
+            } else if (instance.isType(UIType.SCENE) === true)
+            {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_SCENE, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+            } else if (instance.isType(UIType.MENU) === true)
+            {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_MENU, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+            } else if (instance.isType(UIType.GUIDE) === true)
+            {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_GUIDE, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+            } else if (instance.isType(UIType.TOOLTIP) === true)
+            {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_TOOLTIP, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+            } else if (instance.isType(UIType.COMMON) === true)
+            {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMMON, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+            }
+        }
+
+        /**
+         * 显示记录面板
+         * @private
+         * @param {*} type 
+         * @param {*} args 
+         * @returns {BaseComponent} 
+         * @memberof UI
+         */
+        private showHistoryPanel(type: any, args: any): BaseComponent
+        {
+            let hookList: any[] = [];
+            let hook = {
+                setData: (data, type?) =>
+                {
+                    hookList.push({ action: HookAction.SET_DATA, data: data, type: type });
+                }, addOperate: (operate: IComponentOperate<any>) =>
+                {
+                    hookList.push({ action: HookAction.ADD_OPERATE, operate: operate, data: operate.serialize() });
+                }
+            };
+            this.panelHistory.pushHistory(type, args, false, hookList);
+            let panel = this.showPanel(type, args);
+            panel.hook = hook;
+            panel.setHistoryComponent(true);
+            return panel;
+        }
+
+        /**
+         * 显示记录弹框
+         * @private
+         * @param {*} boxType 
+         * @param {*} args 
+         * @memberof UI
+         */
+        private addHistoryBox(boxType: any, args: any): void
+        {
+            for (let i: number = this._box.numChildren - 1; i >= 0; i--)
+            {
+                let boxInst: any = this._box.getChildAt(i);
+                if (boxInst.isHistoryComponent() === true)
+                {
+                    Display.removeFromParent(boxInst, true);
+                }
+            }
+            this.boxHistory.pushHistory(boxType, args, false);
+            let box = this.addBox(boxType, args);
+            box.setHistoryComponent(true);
+        }
+
+        /**
+         * 记录检查
+         * @private
+         * @param {boolean} gotoHistory 
+         * @param {UIHistory} history 
+         * @param {Function} gotoBackFun 
+         * @returns {void} 
+         * @memberof UI
+         */
+        private checkHistory(gotoHistory: boolean, history: UIHistory, gotoBackFun: Function): void
+        {
+            if (!history)
+            {
+                return;
+            }
+            if (gotoHistory && history.hasHistory())
+            {
+                history.popHistory();
+                let item: UIHistoryItem = history.getLastItem();
+                if (item)
+                {
+                    gotoBackFun(item);
+                }
+            } else
+            {
+                history.clear();
+            }
+        }
+
+        /**
+         * 重置面板的钩子列表
+         * @private
+         * @param {BaseComponent} panel 
+         * @param {any[]} hookList 
+         * @memberof UI
+         */
+        private resetHookList(panel: BaseComponent, hookList: any[]): void
+        {
+            for (let i: number = 0; i < hookList.length; i++)
+            {
+                let item: IHookItemInfo = hookList[i];
+                if (item.action == HookAction.SET_DATA)
+                {
+                    panel.setData(item.data, item.type);
+                } else if (item.action == HookAction.ADD_OPERATE)
+                {
+                    let data = item.data;
+                    item.operate.unserialize(data);
+                    panel.addOperate(item.operate);
+                }
+            }
+        }
+
+        /**
+         * 添加序列弹框
+         * @private
+         * @param {*} boxType 
+         * @param {string} group 
+         * @param {number} priority 
+         * @param {*} args 
+         * @param {string} [type=null] 
+         * @memberof UI
+         */
+        private addSequnceBox(boxType: any, group: string, priority: number, args: any, type: string = null): void
+        {
+            if (!this._sequenceBoxMap.hasOwnProperty(group))
+            {
+                this._sequenceBoxMap[group] = [];
+            }
+            let arr = this._sequenceBoxMap[group];
+            let obj = { boxType, group, args, priority, type };
+            if (!arr.length && group == '__normal__')
+            {
+                this.runSeqBox(arr, group, obj);
+            } else
+            {
+                arr.push(obj);
+                if (priority != -9999)
+                {
+                    arr = arr.sort((a, b) =>
+                    {
+                        return b.priority - a.priority;
+                    });
+                }
+            }
+        }
+
+        private getSequnceCount(group: string): number
+        {
+            let arr = this._sequenceBoxMap[group];
+            if (arr && arr.length > 0)
+            {
+                return arr.length;
+            }
+            return 0;
+        }
+
+        private runSequnceBox(group: string): void
+        {
+            let arr = this._sequenceBoxMap[group];
+            if (arr && arr.length > 0)
+            {
+                let top = arr.shift();
+                this.runSeqBox(arr, group, top);
+            }
+        }
+
+        private runSeqBox(arr: any, group: string, top: any): void
+        {
+            let box = null;
+            if (top.type == 'fun')
+            {
+                box = top.args[0];
+                egret.callLater(() =>
+                {
+                    box(() =>
+                    {
+                        this.onRemoveBox(box);
+                    });
+                }, this);
+            } else
+            {
+                box = this.addBox(top.boxType, top.args);
+            }
+            box['__box_group__'] = group;
+            arr.push(box);
+        }
+
+        private onRemoveBox(box: any): void
+        {
+            let group = box['__box_group__'];
+            if (group)
+            {
+                let arr = this._sequenceBoxMap[group];
+                if (arr)
+                {
+                    let idx: number = arr.indexOf(box);
+                    if (idx > -1)
+                    {
+                        arr.splice(idx, 1);
+                    }
+                    if (!arr.length)
+                    {
+                        delete this._sequenceBoxMap[group];
+                        this.dispatchEvent(new UIEvent(UIEvent.CLEAR_SEQUENCE_BOX, null, group));
+                    } else
+                    {
+                        let top = arr.shift();
+                        this.runSeqBox(arr, group, top);
+                    }
+                }
+            }
         }
 
         /**
@@ -515,15 +941,15 @@ module dragon
          * @private
          * @param {string} name 
          * @param {egret.DisplayObjectContainer} container 
-         * @returns {dragon.BaseComponent} 
+         * @returns {BaseComponent} 
          * @memberof UI
          */
-        private getComponentByName(name: string, container: egret.DisplayObjectContainer): dragon.BaseComponent
+        private getComponentByName(name: string, container: egret.DisplayObjectContainer): BaseComponent
         {
             let num: number = container.numChildren;
             for (let i: number = 0; i < num; i++)
             {
-                let child: dragon.BaseComponent = <dragon.BaseComponent>container.getChildAt(i);
+                let child: BaseComponent = <BaseComponent>container.getChildAt(i);
                 if (child.componentName == name)
                 {
                     return child;
@@ -538,7 +964,7 @@ module dragon
          * @returns {IComponent} 
          * @memberof UI
          */
-        public getComponent(name: string): IComponent
+        private getComponent(name: string): IComponent
         {
             let pullComponent = <any>dragon.pullObject(dragon.NoticeNameKey.GetComponent, name);
             if (pullComponent && pullComponent != name)
@@ -565,7 +991,7 @@ module dragon
         public removeComponent(name: string): void
         {
             let obj: any = this.getComponent(name);
-            if (egret.is(obj, 'dragon.BaseComponent'))
+            if (egret.is(obj, 'BaseComponent'))
             {
                 if (!this.isSingleContainer(obj))
                 {
@@ -679,39 +1105,175 @@ module dragon
             }
         }
 
+        // public static getComponent<T extends IComponent>(name: string): T;
+        public static getComponent(name: string): IComponent
+        {
+            return singleton(UI).getComponent(name);
+        }
+
+        public static panelIsDisplay(name: string): boolean
+        {
+            return singleton(UI).panelIsDisplay(name);
+        }
+
         public static hasPanel(): boolean
         {
-            return dragon.singleton(UI).hasPanel();
+            return singleton(UI).hasPanel();
         }
 
         public static removeByName(name: string): void
         {
-            dragon.singleton(UI).removeComponent(name);
+            singleton(UI).removeComponent(name);
         }
 
         public static setMenu(type: any, ...args): void
         {
-            dragon.singleton(UI).setMenu(type, args);
+            singleton(UI).setMenu(type, args);
         }
 
-        public static addGuide(type: any, ...args): dragon.BaseComponent
+        public static addGuide(type: any, ...args): BaseComponent
         {
-            return dragon.singleton(UI).addGuide(type, args);
+            return singleton(UI).addGuide(type, args);
         }
 
-        public static addBox(type: any, ...args): dragon.BaseComponent
+        public static addBox(type: any, ...args): BaseComponent
         {
-            return dragon.singleton(UI).addBox(type, args);
+            return singleton(UI).addBox(type, args);
+        }
+
+        public static showPanel(type: any, ...args): BaseComponent
+        {
+            return singleton(UI).showPanel(type, args);
+        }
+
+        public static addCommon(type: any, ...args): void
+        {
+            singleton(UI).addCommon(type, args);
+        }
+
+        public static addTooltip(type: any, ...args): void
+        {
+            singleton(UI).addTooltip(type, args);
+        }
+
+        public static runTopScene(sceneType: any, ...args): BaseComponent
+        {
+            return singleton(UI).runTopScene(sceneType, args);
+        }
+
+        public static runScene(sceneType: any, ...args): BaseComponent
+        {
+            return singleton(UI).runScene(sceneType, args);
+        }
+
+        public static addSequenceBox(type: any, ...args): void
+        {
+            singleton(UI).addSequnceBox(type, '_normal_', -99999, args);
+        }
+
+        public static getSequenceCount(group: string): number
+        {
+            return singleton(UI).getSequnceCount(group);
+        }
+
+        public static addHistoryBox(type: any, ...args): void
+        {
+            singleton(UI).addHistoryBox(type, args);
+        }
+
+        public static showHistoryPanel(type: any, ...args): BaseComponent
+        {
+            return singleton(UI).showHistoryPanel(type, args)
+        }
+
+        public static runGroupSequenceBox(group: string): void
+        {
+            singleton(UI).runSequnceBox(group);
+        }
+
+        public static injectPanel(name: string, type: any, ...args): void
+        {
+            args.unshift(name);
+            singleton(UI).injectPanel(name, type, args);
+        }
+
+        public static addEventListener(type: string, func: (e: egret.Event) => void, context?: any): void
+        {
+            singleton(UI).addEventListener(type, func, context);
+        }
+
+        public static once(type: string, func: (e: egret.Event) => void, context?: any): void
+        {
+            singleton(UI).once(type, func, context);
+        }
+
+        public static removeEventListener(type: string, func: (e: egret.Event) => void, context?: any): void
+        {
+            singleton(UI).removeEventListener(type, func, context);
         }
 
         public static remove(instance: any, gotoHistory: boolean = null): void
         {
-            dragon.singleton(UI).remove(instance, gotoHistory);
+            singleton(UI).remove(instance, gotoHistory);
+        }
+
+        public static addGroupSequenceBox(type: any, group: string, priority: number, ...args): void
+        {
+            singleton(UI).addSequnceBox(type, group, priority, args);
+        }
+
+        public static addGroupSequenceFun(fun: (callback: () => void) => void, group: string, priority: number): void
+        {
+            singleton(UI).addSequnceBox(null, group, priority, [fun], 'fun');
+        }
+
+        public static clearBox(): void
+        {
+            singleton(UI).clearBox();
+        }
+
+        public static getMenu(): any
+        {
+            var ui = singleton(UI)._menuInst;
+            return ui;
+        }
+
+        public static getScene(): any
+        {
+            var ui = singleton(UI)._sceneInst;
+            return ui;
+        }
+
+        public static getContainerByType(type: UIType): egret.DisplayObjectContainer
+        {
+            return singleton(UI).getContainerByType(type);
+        }
+
+        public static hidePanel(panel?: any): void
+        {
+            singleton(UI).hidePanel(panel);
+        }
+
+        public static get panelHistory(): UIHistory
+        {
+            return singleton(UI).panelHistory;
+        }
+
+        public static setBoxVisible(visible: boolean, without: BaseComponent = null): void
+        {
+            var u = singleton(UI);
+            for (var i = 0, len = u._box.numChildren; i < len; i++)
+            {
+                if (u._box.getChildAt(i) != without)
+                {
+                    u._box.getChildAt(i).visible = visible;
+                }
+            }
         }
 
         public static setRoot(container: egret.DisplayObjectContainer): void
         {
-            dragon.singleton(UI).setRoot(container);
+            singleton(UI).setRoot(container);
         }
     }
 }
