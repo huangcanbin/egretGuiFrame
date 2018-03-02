@@ -98,6 +98,11 @@ module dragon
         setComplete(sel: () => void, contex?: any): void;
     }
 
+    /**
+     * 弹框实现接口
+     * @export
+     * @interface IConfirm
+     */
     export interface IConfirm
     {
         show(callback: (btn: ConfirmButton) => void, contex: any): void;
