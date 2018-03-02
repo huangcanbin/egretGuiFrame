@@ -90,13 +90,13 @@ var dragon;
         BaseAnimation.prototype.toProps = function (props, type) {
             if (type === void 0) { type = 'by'; }
             var obj = {};
-            for (var key in props) {
-                var num = props[key];
-                if (type == 'by' || key == 'x' || key == 'y') {
-                    obj[key] = num > 0 ? '+=' + num : '-=' + Math.abs(num);
+            for (var key_1 in props) {
+                var num = props[key_1];
+                if (type == 'by' || key_1 == 'x' || key_1 == 'y') {
+                    obj[key_1] = num > 0 ? '+=' + num : '-=' + Math.abs(num);
                 }
                 else {
-                    obj[key] = '' + num;
+                    obj[key_1] = '' + num;
                 }
             }
             return obj;
@@ -112,8 +112,8 @@ var dragon;
         BaseAnimation.prototype.fromProps = function (props, type) {
             if (type === void 0) { type = 'by'; }
             var obj = {};
-            for (var key in props) {
-                obj[key] = '+=0';
+            for (var key_2 in props) {
+                obj[key_2] = '+=0';
             }
             return obj;
         };
@@ -1253,12 +1253,1911 @@ var dragon;
 })(dragon || (dragon = {}));
 var dragon;
 (function (dragon) {
-    var BaseComponent = /** @class */ (function () {
+    /**
+     * 组件操作状态（进入和退出）
+     * @export
+     * @enum {number}
+     */
+    var OperateState;
+    (function (OperateState) {
+        OperateState[OperateState["enter"] = 0] = "enter";
+        OperateState[OperateState["exit"] = 1] = "exit";
+    })(OperateState = dragon.OperateState || (dragon.OperateState = {}));
+    /**
+     * 基础UI组件
+     * @export
+     * @class BaseComponent
+     * @extends {egret.EventDispatcher}
+     * @implements {IComponent}
+     * @implements {dragon.IUIAnimationDisplay}
+     */
+    var BaseComponent = /** @class */ (function (_super) {
+        __extends(BaseComponent, _super);
         function BaseComponent() {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+            var _this = _super.call(this) || this;
+            _this.$_componentState = OperateState.exit;
+            _this._operates = [];
+            _this._dataMapArr = [];
+            _this._isHistoryComponent = false;
+            _this.$_state = new dragon.ComponentState(_this);
+            _this.setArgs(args);
+            return _this;
         }
+        Object.defineProperty(BaseComponent.prototype, "displayObject", {
+            get: function () {
+                return this._displayObject.displayObject;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BaseComponent.prototype, "display", {
+            get: function () {
+                return this._displayObject;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BaseComponent.prototype, "skinName", {
+            set: function (name) {
+                if (name) {
+                    var keys = name.split('.');
+                    var pkgName = keys[0];
+                    var resName = keys[1];
+                    var userClass = keys[2] ? keys[2] : null;
+                    this._displayObject = fairygui.UIPackage.createObject(pkgName, resName, userClass).asCom;
+                    this.display.name = 'UI_CONTAINER';
+                    this.addChild(this.displayObject);
+                    this.width = this.displayObject.width;
+                    this.height = this.displayObject.height;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        BaseComponent.prototype.ckearListeners = function () {
+            this.$_state.clearListeners();
+        };
+        /**
+         * 设置参数
+         * @param {*} args
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.setArgs = function (args) {
+            this.$_state.setArgs(args);
+            this.pullData();
+        };
+        /**
+         * 进入
+         * @param {any} args
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.onEnter = function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+        };
+        /**
+         * 退出
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.onExit = function () {
+            if (this._displayObject) {
+                this._displayObject.removeChildren();
+                this._displayObject.dispose();
+            }
+            this.removeChildren();
+        };
+        BaseComponent.prototype.listener = function (component, callback) {
+            this.$_state.listener(component, callback);
+        };
+        /**
+         * 设置数据
+         * @param {*} data
+         * @param {*} [type]
+         * @returns {IComponent}
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.setData = function (data, type) {
+            if (type == 'data') {
+                this.data = data;
+                if (data) {
+                    this.addDataMap('data');
+                }
+            }
+            else {
+                this[type] = data;
+                if (data) {
+                    this.addDataMap(type);
+                    dragon.PropertyEvent.dispatchPropertyEvent(this, dragon.PropertyEvent.PROPERTY_CHANGE, type);
+                }
+            }
+            if (this._hook && data) {
+                this._hook.setData(data, type);
+            }
+            return this;
+        };
+        BaseComponent.prototype.setComName = function () {
+            this.componentName = name;
+            return this;
+        };
+        BaseComponent.prototype.pullData = function () {
+            console.log("下拉数据");
+        };
+        /**
+         * 获取动画的显示容器
+         * @param {UI_TYPE} [type]
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.getAnimationDisplay = function (type) {
+            if (!type || is.falsy(type)) {
+                return this;
+            }
+            if (type == dragon.UI_TYPE.BOX) {
+                return this.getSubView('box');
+            }
+            else if (type == dragon.UI_TYPE.MASK) {
+                return this.getSubView('mask');
+            }
+            else {
+                return this.getSubView(type);
+            }
+        };
+        /**
+         * 获取子显示层
+         * @private
+         * @param {string} name
+         * @returns {*}
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.getSubView = function (name) {
+            if (this[name]) {
+                return this[name];
+            }
+            return (this.display.getChild(name).asCom).displayObject;
+        };
+        Object.defineProperty(BaseComponent.prototype, "data", {
+            get: function () {
+                return this.$_data;
+            },
+            set: function (value) {
+                this.$_data = value;
+                if (value != null) {
+                    this.addDataMap('data');
+                    dragon.PropertyEvent.dispatchPropertyEvent(this, dragon.PropertyEvent.PROPERTY_CHANGE, 'data');
+                }
+                this.dataChanged();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        BaseComponent.prototype.addDataMap = function (name) {
+            if (this._dataMapArr.indexOf(name) == -1) {
+                this._dataMapArr.push(name);
+            }
+        };
+        BaseComponent.prototype.dataChanged = function () {
+        };
+        /**
+         * 添加操作
+         * @param {IComponentOperate<any>} operate
+         * @returns {BaseComponent}
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.addOperate = function (operate) {
+            if (this.$_componentState == OperateState.enter) {
+                operate.state = OperateState.enter;
+                operate.enter(this);
+            }
+            else {
+                operate.state = OperateState.exit;
+            }
+            if (this._hook) {
+                this._hook.addOperate(operate);
+            }
+            this._operates.push(operate);
+            return this;
+        };
+        /**
+         * 移除操作
+         * @param {IComponentOperate<any>} operate
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.removeOperate = function (operate) {
+            var idx = this._operates.indexOf(operate);
+            if (idx > -1) {
+                operate.state = OperateState.exit;
+                operate.exit(this);
+                this._operates.splice(idx, 1);
+            }
+        };
+        /**
+         * 根据操作名删除操作
+         * @param {string} name
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.removeOperateByName = function (name) {
+            for (var i = this._operates.length - 1; i >= 0; i--) {
+                if (this._operates[i].getName() == name) {
+                    this.removeOperate(this._operates[i]);
+                }
+            }
+        };
+        /**
+         * 根据操作名获取操作列表
+         * @param {string} name
+         * @returns {IComponentOperate<any>[]}
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.getOperateByName = function (name) {
+            var result = [];
+            for (var i = 0; i < this._operates.length; i++) {
+                if (this._operates[i].getName() == name) {
+                    result.push(this._operates[i]);
+                }
+            }
+            return result;
+        };
+        /**
+         * 根据类型名获取操作列表
+         * @param {string} type
+         * @returns {IComponentOperate<any>[]}
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.getOperateByType = function (type) {
+            var result = [];
+            for (var i = 0; i < this._operates.length; i++) {
+                if (this._operates[i].type == type) {
+                    result.push(this._operates[i]);
+                }
+            }
+            return result;
+        };
+        BaseComponent.prototype.operatesIsComplete = function () {
+            return this._operates.every(function (operate) { return operate.isComplete; });
+        };
+        BaseComponent.prototype.setOperatesComplete = function () {
+            this._operates.forEach(function (operate) { return operate.setComplete(); });
+        };
+        /**
+         * 清理所有操作
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.clearOperate = function () {
+            while (this._operates.length > 0) {
+                this.removeOperate(this._operates[0]);
+            }
+        };
+        /**
+         * 销毁数据
+         * @memberof BaseComponent
+         */
+        BaseComponent.prototype.destroyData = function () {
+            while (this._dataMapArr.length) {
+                this[this._dataMapArr.shift()] = null;
+            }
+            dragon.Display.destroyChildren(this.displayObject);
+        };
+        Object.defineProperty(BaseComponent.prototype, "animation", {
+            get: function () {
+                return this.$_anim;
+            },
+            /**
+             * 为组件设置动画类
+             * @memberof BaseComponent
+             */
+            set: function (value) {
+                this.$_anim = value;
+                if (value) {
+                    this.$_anim.displayObject = this;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
+        BaseComponent.prototype.setHistoryComponent = function (isHistory) {
+            this._isHistoryComponent = isHistory;
+        };
+        BaseComponent.prototype.setType = function (type) {
+            this._type = type;
+        };
+        BaseComponent.prototype.isType = function (type) {
+            if (type == dragon.UIType.ANY) {
+                return this._type > dragon.UIType.MIN && this._type < dragon.UIType.ANY;
+            }
+            return this._type == type;
+        };
+        BaseComponent.prototype.isHistoryComponent = function () {
+            return this._isHistoryComponent;
+        };
+        Object.defineProperty(BaseComponent.prototype, "autoId", {
+            get: function () {
+                return this.$_data ? this.$_data.autoId : '';
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BaseComponent.prototype, "componentState", {
+            get: function () {
+                return this.$_componentState;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BaseComponent.prototype, "componentName", {
+            get: function () {
+                return this._componentName;
+            },
+            set: function (value) {
+                this._componentName = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(BaseComponent.prototype, "hook", {
+            get: function () {
+                return this._hook;
+            },
+            set: function (value) {
+                this._hook = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return BaseComponent;
-    }());
+    }(egret.DisplayObjectContainer));
     dragon.BaseComponent = BaseComponent;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     *
+     * @export
+     * @class BaseOperate
+     * @extends {egret.HashObject}
+     * @implements {IComponentOperate<T>}
+     * @template T
+     */
+    var BaseOperate = /** @class */ (function (_super) {
+        __extends(BaseOperate, _super);
+        function BaseOperate() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this._complete = false;
+            return _this;
+        }
+        Object.defineProperty(BaseOperate.prototype, "state", {
+            get: function () {
+                return this._state;
+            },
+            set: function (value) {
+                this._state = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        BaseOperate.prototype.getType = function () {
+            return 'none';
+        };
+        Object.defineProperty(BaseOperate.prototype, "type", {
+            get: function () {
+                return this.getType();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        BaseOperate.prototype.setComplete = function () {
+            this._complete = true;
+        };
+        BaseOperate.prototype.getIsComplete = function () {
+            return this._complete;
+        };
+        Object.defineProperty(BaseOperate.prototype, "isComplete", {
+            get: function () {
+                return this.getIsComplete();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        BaseOperate.prototype.getName = function () {
+            return this._name;
+        };
+        BaseOperate.prototype.setName = function (val) {
+            this._name = val;
+            var result = this;
+            return result;
+        };
+        BaseOperate.prototype.serialize = function () {
+            return null;
+        };
+        BaseOperate.prototype.unserialize = function (data) {
+        };
+        BaseOperate.prototype.enter = function (component) {
+        };
+        BaseOperate.prototype.exit = function (component) {
+        };
+        return BaseOperate;
+    }(egret.HashObject));
+    dragon.BaseOperate = BaseOperate;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 组件状态（添加与移除）
+     * @export
+     * @class ComponentState
+     */
+    var ComponentState = /** @class */ (function () {
+        function ComponentState(component) {
+            this._args = [];
+            this._listeners = [];
+            this._component = component;
+            component.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
+            component.addEventListener(egret.Event.REMOVED_FROM_STAGE, this.onRemovedFromStage, this);
+        }
+        ComponentState.prototype.getArgs = function () {
+            return this._args;
+        };
+        ComponentState.prototype.setArgs = function (args) {
+            this._args = args;
+        };
+        ComponentState.prototype.listener = function (component, callback) {
+            if (!component || !callback) {
+                return;
+            }
+            var type = egret.TouchEvent.TOUCH_TAP;
+            this._listeners.push({ component: component, callback: callback, type: type });
+            component.addEventListener(type, callback, this);
+        };
+        ComponentState.prototype.onAddToStage = function () {
+            dragon.addPullObject(dragon.NoticeNameKey.GetComponent, this.getComponent, this);
+            (_a = this._component).onEnter.apply(_a, this._args);
+            var _a;
+        };
+        ComponentState.prototype.onRemovedFromStage = function () {
+            dragon.removePullObject(dragon.NoticeNameKey.GetComponent, this.getComponent, this);
+            this.clearListeners();
+            this._component.onExit();
+        };
+        ComponentState.prototype.clearListeners = function () {
+            while (this._listeners.length > 0) {
+                var item = this._listeners.shift();
+                item.component.removeEventListener(item.type, item.callback, this);
+            }
+        };
+        ComponentState.prototype.getComponent = function (id) {
+            if (id == this._component.autoId && is.truthy(id)) {
+                return this._component;
+            }
+            else if (this._component.componentName == id && is.truthy(id)) {
+                return this._component;
+            }
+        };
+        return ComponentState;
+    }());
+    dragon.ComponentState = ComponentState;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 资源加载
+     * @export
+     * @class ResourceLoad
+     * @implements {dragon.ILoad}
+     */
+    var ResourceLoad = /** @class */ (function () {
+        function ResourceLoad(resource) {
+            this._resourceGroup = resource;
+        }
+        Object.defineProperty(ResourceLoad.prototype, "loadUpdate", {
+            get: function () {
+                return this._loadUpdate;
+            },
+            set: function (value) {
+                this._loadUpdate = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 资源加载
+         * @memberof ResourceLoad
+         */
+        ResourceLoad.prototype.load = function () {
+            var res = this._resourceGroup.getRes();
+            var groupName = this._resourceGroup.name;
+            if (res.length > 0) {
+                RES.createGroup(groupName, res, true);
+                RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE, this.onLoaded, this);
+                RES.addEventListener(RES.ResourceEvent.GROUP_PROGRESS, this.onProgress, this);
+            }
+            else {
+                if (this._loadUpdate) {
+                    this._loadUpdate.update(0, 0);
+                    this._loadUpdate.onComplete();
+                }
+            }
+        };
+        /**
+         * 加载完成
+         * @private
+         * @param {RES.ResourceEvent} event
+         * @memberof ResourceLoad
+         */
+        ResourceLoad.prototype.onLoaded = function (event) {
+            if (event.groupName == this._resourceGroup.name) {
+                RES.removeEventListener(RES.ResourceEvent.GROUP_COMPLETE, this.onLoaded, this);
+                RES.removeEventListener(RES.ResourceEvent.GROUP_PROGRESS, this.onProgress, this);
+                if (this._loadUpdate) {
+                    this._loadUpdate.onComplete();
+                }
+            }
+        };
+        /**
+         * 加载中
+         * @private
+         * @param {RES.ResourceEvent} event
+         * @memberof ResourceLoad
+         */
+        ResourceLoad.prototype.onProgress = function (event) {
+            if (this._loadUpdate) {
+                this._loadUpdate.update(event.itemsLoaded, event.itemsTotal);
+            }
+        };
+        return ResourceLoad;
+    }());
+    dragon.ResourceLoad = ResourceLoad;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ * tip和confirm相关接口
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 确认框按钮类型
+     * @export
+     * @enum {number}
+     */
+    var ConfirmButton;
+    (function (ConfirmButton) {
+        ConfirmButton[ConfirmButton["close"] = 0] = "close";
+        ConfirmButton[ConfirmButton["yes"] = 1] = "yes";
+        ConfirmButton[ConfirmButton["no"] = 2] = "no";
+    })(ConfirmButton = dragon.ConfirmButton || (dragon.ConfirmButton = {}));
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    var _proxyLoadingMap = {}; //请求时的加载界面实例映射
+    var _loading; //场景加载时的实例映射
+    var _tooltip; //tip
+    /**
+     * 获取请求时的进度加载实例（打开进度加载）,可自定义加载皮肤
+     * @param {string} skinName
+     * @returns {IProgressLoading}
+     */
+    function getProgressLoading(skinName) {
+        if (!_proxyLoadingMap.hasOwnProperty(skinName)) {
+            var loading = dragon.getDefinitionInstance(dragon.getSetting().ProgressLoadingClass, null, skinName);
+            if (DEBUG && !loading) {
+                console.error("请配置ProgressLoadingClass");
+            }
+            if (loading) {
+                dragon.UI.addTooltip(loading);
+                _proxyLoadingMap[skinName] = loading;
+            }
+        }
+        return _proxyLoadingMap[skinName];
+    }
+    /**
+     * 获取场景加载界面实例（打开场景加载）
+     * @returns {IProgressLoading}
+     */
+    function getLoadScene() {
+        var loading = dragon.getDefinitionInstance(dragon.getSetting().LoadSceneClass, null);
+        if (loading) {
+            dragon.UI.runScene(loading);
+        }
+        return loading;
+    }
+    /**
+     * 获取通用加载界面实例（打开进度加载界面）
+     * @returns {ISimpleLoading}
+     */
+    function getSimpleLoading() {
+        if (!_loading) {
+            _loading = dragon.getDefinitionInstance(dragon.getSetting().SimpleLoadingClass, null);
+            if (DEBUG && !_loading) {
+                console.error('请配置SimpleLoadingClass');
+            }
+            if (_loading) {
+                dragon.UI.addTooltip(_loading);
+            }
+        }
+        return _loading;
+    }
+    /**
+     * 显示简单加载条
+     * @export
+     */
+    function showSimpleLoading() {
+        var loading = getSimpleLoading();
+        if (loading) {
+            loading.show();
+        }
+    }
+    dragon.showSimpleLoading = showSimpleLoading;
+    /**
+     * 隐藏简单加载条
+     * @export
+     */
+    function hideSimpleLoading() {
+        var loading = getSimpleLoading();
+        if (loading) {
+            loading.hide();
+        }
+    }
+    dragon.hideSimpleLoading = hideSimpleLoading;
+    /**
+     * 获取资源加载实例
+     * @export
+     * @param {(ILoad | IResourceGroup)} prepare
+     * @returns {ILoad}
+     */
+    function getResLoad(prepare) {
+        var result;
+        if (egret.is(prepare, 'dragon.ILoad')) {
+            result = prepare;
+        }
+        else if (egret.is(prepare, 'dragon.IResourceGroup')) {
+            result = new dragon.ResourceLoad(prepare);
+        }
+        return result;
+    }
+    dragon.getResLoad = getResLoad;
+    /**
+     * 显示进度条
+     * @export
+     * @param {(ILoad | IResourceGroup)} prepare 加载器
+     * @param {string} [skinName='']             加载条的皮肤名
+     * @returns {*}
+     */
+    function showProgressLoading(prepare, skinName) {
+        if (skinName === void 0) { skinName = ''; }
+        var promise = new Promise(function (resolve, reject) {
+            var loading = getProgressLoading(skinName);
+            if (loading) {
+                var load = getResLoad(prepare);
+                loading.load = load;
+                loading.setComplete(function () {
+                    resolve();
+                });
+                load.loadUpdate = loading;
+                loading.show();
+            }
+            else {
+                reject();
+            }
+        });
+        return promise;
+    }
+    dragon.showProgressLoading = showProgressLoading;
+    /**
+     * 显示加载场景界面
+     * @export
+     * @param {(ILoad | IResourceGroup)} scene
+     * @returns {*}
+     */
+    function showLoadScene(scene) {
+        var promise = new Promise(function (resolve, reject) {
+            var loading = getLoadScene();
+            if (loading) {
+                var load = getResLoad(scene);
+                loading.load = load;
+                loading.setComplete(function () {
+                    resolve();
+                });
+                load.loadUpdate = loading;
+                loading.show();
+            }
+        });
+        return promise;
+    }
+    dragon.showLoadScene = showLoadScene;
+    /**
+     * 隐藏进度加载
+     * @export
+     * @param {string} skinName
+     */
+    function hideProgressLoading(skinName) {
+        var loading = getProgressLoading(skinName);
+        if (loading) {
+            loading.hide();
+        }
+    }
+    dragon.hideProgressLoading = hideProgressLoading;
+    /**
+     * 获取 tip 实例
+     * @returns {ITooltip}
+     */
+    function getTooltip() {
+        if (!_tooltip) {
+            _tooltip = dragon.getDefinitionInstance(dragon.getSetting().TooltipClass);
+            if (_tooltip) {
+                dragon.UI.addTooltip(_tooltip);
+            }
+            if (DEBUG && !_tooltip) {
+                console.error("请配置TooltipClass");
+            }
+        }
+        return _tooltip;
+    }
+    /**
+     * 显示浮动 tip 提示
+     * @export
+     * @param {(dragon.TooltipInfo | string)} info
+     * @param {string} [skinName]
+     */
+    function tooltip(info, skinName) {
+        var tip = getTooltip();
+        if (tip) {
+            tip.show(info, skinName);
+        }
+    }
+    dragon.tooltip = tooltip;
+    function customTooltip(skinName, data, delay) {
+        var tip = getTooltip();
+        if (tip) {
+            tip.customView(skinName, data, delay);
+        }
+    }
+    dragon.customTooltip = customTooltip;
+    var BoxType;
+    (function (BoxType) {
+        BoxType[BoxType["Box"] = 0] = "Box";
+        BoxType[BoxType["HistoryBox"] = 1] = "HistoryBox";
+        BoxType[BoxType["SequnceBox"] = 2] = "SequnceBox";
+        BoxType[BoxType["GroupSequnceBox"] = 3] = "GroupSequnceBox";
+    })(BoxType = dragon.BoxType || (dragon.BoxType = {}));
+    /**
+     * 弹出提示框
+     * @export
+     * @param {(ConfirmInfo | string)} info
+     * @param {BoxType} [boxType=BoxType.Box]
+     * @param {any} args
+     * @returns {*}
+     */
+    function confirm(info, boxType) {
+        var _this = this;
+        if (boxType === void 0) { boxType = BoxType.Box; }
+        var args = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            args[_i - 2] = arguments[_i];
+        }
+        var promise = new Promise(function (resolve, reject) {
+            var result = dragon.getDefinitionInstance(dragon.getSetting().ConfirmClass, null, info);
+            if (result) {
+                if (boxType == BoxType.Box) {
+                    dragon.UI.addBox(result);
+                }
+                else if (boxType == BoxType.HistoryBox) {
+                    (_a = dragon.UI).addHistoryBox.apply(_a, [result].concat(args));
+                }
+                else if (boxType == BoxType.SequnceBox) {
+                    (_b = dragon.UI).addSequenceBox.apply(_b, [result].concat(args));
+                }
+                else if (boxType == BoxType.GroupSequnceBox) {
+                    dragon.UI.addGroupSequenceBox(result, args[0], args[1], args.slice(2));
+                }
+                result.show(function (button) {
+                    if (button == dragon.ConfirmButton.yes) {
+                        resolve();
+                    }
+                    else {
+                        reject(button);
+                    }
+                }, _this);
+            }
+            var _a, _b;
+        });
+        return promise;
+    }
+    dragon.confirm = confirm;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    var HookAction;
+    (function (HookAction) {
+        HookAction[HookAction["SET_DATA"] = 0] = "SET_DATA";
+        HookAction[HookAction["ADD_OPERATE"] = 1] = "ADD_OPERATE";
+    })(HookAction = dragon.HookAction || (dragon.HookAction = {}));
+    /**
+     * UI 层级类型
+     * @export
+     * @enum {number}
+     */
+    var UIType;
+    (function (UIType) {
+        UIType[UIType["MIN"] = 0] = "MIN";
+        UIType[UIType["TOOLTIP"] = 1] = "TOOLTIP";
+        UIType[UIType["GUIDE"] = 2] = "GUIDE";
+        UIType[UIType["BOX"] = 3] = "BOX";
+        UIType[UIType["TOPSCENE"] = 4] = "TOPSCENE";
+        UIType[UIType["MENU"] = 5] = "MENU";
+        UIType[UIType["PANEL"] = 6] = "PANEL";
+        UIType[UIType["COMMON"] = 7] = "COMMON";
+        UIType[UIType["SCENE"] = 8] = "SCENE";
+        UIType[UIType["ANY"] = 9] = "ANY";
+    })(UIType = dragon.UIType || (dragon.UIType = {}));
+    /**
+     * UI 事件
+     * @export
+     * @class UIEvent
+     * @extends {egret.Event}
+     */
+    var UIEvent = /** @class */ (function (_super) {
+        __extends(UIEvent, _super);
+        function UIEvent(type, component, group) {
+            if (group === void 0) { group = null; }
+            var _this = _super.call(this, type) || this;
+            _this._component = component;
+            _this._group = group;
+            return _this;
+        }
+        Object.defineProperty(UIEvent.prototype, "component", {
+            get: function () {
+                return this._component;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(UIEvent.prototype, "group", {
+            get: function () {
+                return this._group;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        UIEvent.SHOW_PANEL = "showpanel";
+        UIEvent.HIDE_PANEL = "hidepanel";
+        UIEvent.ADD_BOX = "addbox";
+        UIEvent.CLEAR_SEQUENCE_BOX = "clear_sequence";
+        UIEvent.REMOVE_BOX = "removebox";
+        UIEvent.RUN_SCENE = "runscene";
+        UIEvent.REMOVE_SCENE = "removescene";
+        UIEvent.SET_MENU = "setmenu";
+        UIEvent.REMOVE_MENU = "removemenu";
+        UIEvent.ADD_TOOLTIP = "addtooltip";
+        UIEvent.REMOVE_TOOLTIP = "removetooltip";
+        UIEvent.ADD_GUIDE = "addguide";
+        UIEvent.REMOVE_GUIDE = "remove_guide";
+        UIEvent.ADD_COMPONENT = "add_component";
+        UIEvent.REMOVE_COMPONENT = "remove_component";
+        UIEvent.ADD_COMMON = "add_common";
+        UIEvent.REMOVE_COMMON = "remove_common";
+        return UIEvent;
+    }(egret.Event));
+    dragon.UIEvent = UIEvent;
+    /**
+     * UI 记录
+     * @export
+     * @class UIHistory
+     */
+    var UIHistory = /** @class */ (function () {
+        function UIHistory() {
+            this._history = [];
+        }
+        UIHistory.prototype.pushHistory = function (type, args, isUnder, hookList) {
+            if (hookList === void 0) { hookList = []; }
+            this._history.push({ type: type, args: args, isUnder: isUnder, hookList: hookList });
+        };
+        UIHistory.prototype.getLastItem = function () {
+            if (this.count()) {
+                return this._history[this.count() - 1];
+            }
+        };
+        UIHistory.prototype.count = function () {
+            return this._history.length;
+        };
+        UIHistory.prototype.hasHistory = function () {
+            return this._history.length > 0;
+        };
+        UIHistory.prototype.clear = function () {
+            this._history.length = 0;
+        };
+        UIHistory.prototype.popHistory = function () {
+            return this._history.pop();
+        };
+        return UIHistory;
+    }());
+    dragon.UIHistory = UIHistory;
+    /**
+     * UI 控制器
+     * 层级从下往上:场景层、公共UI层、面板层、菜单层、弹框层、新手引导层、浮动层
+     * @export
+     * @class UI
+     * @extends {fairygui.UIContainer}
+     */
+    var UI = /** @class */ (function (_super) {
+        __extends(UI, _super);
+        function UI() {
+            var _this = _super.call(this) || this;
+            _this._panelTypeMap = {}; //面板信息映射表
+            _this._panelInstanceMap = {}; //面板实例映射
+            _this._currentPanel = null; //当前面板
+            _this._sequenceBoxMap = {}; //弹框序列映射
+            _this.touchEnabled = false;
+            _this._scene = new fairygui.UIContainer();
+            _this._scene.touchEnabled = false;
+            _this.addChild(_this._scene);
+            _this._common = new fairygui.UIContainer();
+            _this._common.touchEnabled = false;
+            _this.addChild(_this._common);
+            _this._panel = new fairygui.UIContainer();
+            _this._panel.touchEnabled = false;
+            _this.addChild(_this._panel);
+            _this._menu = new fairygui.UIContainer();
+            _this._menu.touchEnabled = false;
+            _this.addChild(_this._menu);
+            _this._topScene = new fairygui.UIContainer();
+            _this._topScene.touchEnabled = false;
+            _this.addChild(_this._topScene);
+            _this._box = new fairygui.UIContainer();
+            _this._box.touchEnabled = false;
+            _this.addChild(_this._box);
+            _this._guide = new fairygui.UIContainer();
+            _this._guide.touchEnabled = false;
+            _this.addChild(_this._guide);
+            _this._tooltip = new fairygui.UIContainer();
+            _this._tooltip.touchEnabled = false;
+            _this.addChild(_this._tooltip);
+            _this._containerArr = [_this._scene, _this._common, _this._panel, _this._menu, _this._topScene, _this._box, _this._guide, _this._tooltip];
+            return _this;
+        }
+        /**
+         * 注入面板到控制器中
+         * @param {string} name 面板名称
+         * @param {*} type      面板类型
+         * @param {*} args      参数列表
+         * @memberof UI
+         */
+        UI.prototype.injectPanel = function (name, type, args) {
+            this._panelTypeMap[name] = { name: name, type: type, args: args };
+        };
+        /**
+         * 隐藏面板
+         * @param {*} [panel]
+         * @memberof UI
+         */
+        UI.prototype.hidePanel = function (panel) {
+            if (!panel) {
+                this.setPanelHide(this._currentPanel);
+            }
+            else {
+                if (is.string(panel)) {
+                    this.setPanelHide(this._panelInstanceMap[panel]);
+                }
+                else {
+                    this.setPanelHide(panel);
+                }
+            }
+        };
+        /**
+         * 面板是否显示
+         * @param {string} name
+         * @returns {boolean}
+         * @memberof UI
+         */
+        UI.prototype.panelIsDisplay = function (name) {
+            if (this._currentPanel && this._currentPanel.getComponentName() == name) {
+                return this._currentPanel.visible;
+            }
+            return false;
+        };
+        /**
+         * 设置面板隐藏
+         * @private
+         * @param {BaseComponent} panel
+         * @memberof UI
+         */
+        UI.prototype.setPanelHide = function (panel) {
+            if (this._currentPanel && this._currentPanel == panel) {
+                this.onExit(this._currentPanel, !this.panelInInstanceMap(panel));
+                this.dispatchEvent(new UIEvent(UIEvent.HIDE_PANEL, this._currentPanel));
+            }
+        };
+        /**
+         * 面板是否在实例映射表中
+         * @private
+         * @param {*} panel
+         * @returns {boolean}
+         * @memberof UI
+         */
+        UI.prototype.panelInInstanceMap = function (panel) {
+            for (var key_3 in this._panelInstanceMap) {
+                if (this._panelInstanceMap[key_3] == panel) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        /**
+         * 退出，执行相关动画与移除操作
+         * @private
+         * @param {BaseComponent} component
+         * @param {boolean} remove
+         * @memberof UI
+         */
+        UI.prototype.onExit = function (component, remove) {
+            if (component.animation) {
+                component.animation.close(function () {
+                    component.visible = false;
+                    if (remove) {
+                        component.destroyData();
+                        dragon.Display.removeFromParent(component, true);
+                    }
+                });
+            }
+            else {
+                if (remove) {
+                    component.destroyData();
+                    dragon.Display.removeFromParent(component, true);
+                }
+            }
+        };
+        /**
+         * 进入，执行相关动画操作
+         * @private
+         * @param {BaseComponent} component
+         * @memberof UI
+         */
+        UI.prototype.onEnter = function (component) {
+            var _this = this;
+            if (component.animation) {
+                component.visible = true;
+                if (component.stage) {
+                    this.showAnimation(component);
+                }
+                else {
+                    component.once(egret.Event.ADDED_TO_STAGE, function () {
+                        _this.showAnimation(component);
+                    }, this);
+                }
+            }
+        };
+        UI.prototype.showAnimation = function (component) {
+            egret.callLater(function () {
+                component.animation.show(function () { });
+            }, this);
+        };
+        /**
+         * 清除所有的弹框
+         * @memberof UI
+         */
+        UI.prototype.clearBox = function () {
+            this.boxHistory.clear();
+            for (var i = this._box.numChildren - 1; i >= 0; i--) {
+                var box = this._box.getChildAt(i);
+                dragon.UI.remove(box, false);
+            }
+        };
+        /**
+         * 设置实例的动画
+         * @private
+         * @param {string} animationName 动画名
+         * @param {*} instance           实例
+         * @memberof UI
+         */
+        UI.prototype.setAnimation = function (animationName, instance) {
+            if (!instance.animation && animationName) {
+                var animType = egret.getDefinitionByName(animationName);
+                if (animType) {
+                    var animInstance = new animType();
+                    instance.animation = animInstance;
+                }
+            }
+        };
+        /**
+         * 显示面板（面板名为字符串）
+         * @private
+         * @param {string} name
+         * @param {*} args
+         * @returns {*}
+         * @memberof UI
+         */
+        UI.prototype._showPanel = function (name, args) {
+            this.setPanelHide(this._currentPanel);
+            if (!this._panelInstanceMap.hasOwnProperty(name)) {
+                var info = this._panelTypeMap[name];
+                var inst = new ((_a = info.type).bind.apply(_a, [void 0].concat(info.args)))();
+                this._panelInstanceMap[name] = inst;
+                inst.componentName = name;
+                dragon.Display.setFullDisplay(inst);
+                this._panel.addChild(inst);
+            }
+            this._currentPanel = this._panelInstanceMap[name];
+            this._currentPanel.setType(UIType.PANEL);
+            if (this._currentPanel.setArgs) {
+                (_b = this._currentPanel).setArgs.apply(_b, args);
+            }
+            this.setAnimation(dragon.getSetting().PanelAnimation, this._currentPanel);
+            this.dispatchEvent(new UIEvent(UIEvent.SHOW_PANEL, this._currentPanel));
+            return this._currentPanel;
+            var _a, _b;
+        };
+        /**
+         * 添加面板层（面板名为非字符串）
+         * @private
+         * @param {*} panelType
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        UI.prototype._addPanel = function (panelType, args) {
+            this.hidePanel(this._currentPanel);
+            var panelInst = this.getTypeInst(panelType, dragon.getSetting().PanelAnimation, args, UIType.PANEL);
+            dragon.Display.setFullDisplay(panelInst);
+            this._panel.addChild(panelInst);
+            this._currentPanel = panelInst;
+            this.dispatchEvent(new UIEvent(UIEvent.SHOW_PANEL, panelInst));
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, panelInst));
+            return panelInst;
+        };
+        /**
+         * 显示面板
+         * @private
+         * @param {*} panel
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        UI.prototype.showPanel = function (panel, args) {
+            if (is.string(panel)) {
+                return this._showPanel(panel, args);
+            }
+            else {
+                return this._addPanel(panel, args);
+            }
+        };
+        /**
+         * 获取类型实例
+         * @private
+         * @param {*} type            类型
+         * @param {string} animation  动画
+         * @param {any[]} args        参数
+         * @param {UIType} uiType     UI类型
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        UI.prototype.getTypeInst = function (type, animation, args, uiType) {
+            var inst = null;
+            if (typeof type == 'string') {
+                if (uiType == UIType.BOX) {
+                    type = dragon.getDefinitionType(dragon.getSetting().BoxClass, dragon.BaseComponent);
+                }
+                else {
+                    type = dragon.BaseComponent;
+                }
+            }
+            if (type.constructor.name == 'Function') {
+                inst = new (type.bind.apply(type, [void 0].concat(args)))();
+            }
+            else {
+                inst = type;
+                if (inst.setArgs) {
+                    inst.setArgs(args);
+                }
+            }
+            if (egret.is(inst, 'BaseComponent')) {
+                inst.setType(uiType);
+            }
+            this.setAnimation(animation, inst);
+            this.onEnter(inst);
+            return inst;
+        };
+        /**
+         * 设置主菜单栏
+         * @private
+         * @param {*} menuTtype
+         * @param {*} args
+         * @memberof UI
+         */
+        UI.prototype.setMenu = function (menuTtype, args) {
+            if (this._menuInst) {
+                this.remove(this._menuInst);
+            }
+            var menuInst = this.getTypeInst(menuTtype, null, args, dragon.UIType.MENU);
+            dragon.Display.setFullDisplay(menuInst);
+            this._menuInst = menuInst;
+            this._menuInst.bottom = 0;
+            this._menu.addChild(this._menuInst);
+            this.dispatchEvent(new UIEvent(UIEvent.SET_MENU, menuInst));
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, menuInst));
+        };
+        /**
+         * 添加引导层
+         * @private
+         * @param {*} guideType
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        UI.prototype.addGuide = function (guideType, args) {
+            var guideInst = this.getTypeInst(guideType, null, args, dragon.UIType.GUIDE);
+            dragon.Display.setFullDisplay(guideInst);
+            this._guide.addChild(guideInst);
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_GUIDE, guideInst));
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, guideInst));
+            return guideInst;
+        };
+        /**
+         * 添加弹框
+         * @private
+         * @param {*} boxType
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        UI.prototype.addBox = function (boxType, args) {
+            var boxInst = this.getTypeInst(boxType, dragon.getSetting().BoxAnimation, args, UIType.BOX);
+            dragon.Display.setFullDisplay(boxInst);
+            this._box.addChild(boxInst);
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_BOX, boxInst));
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, boxInst));
+            return boxInst;
+        };
+        /**
+         * 添加通用普通界面
+         * @private
+         * @param {*} commonType
+         * @param {*} args
+         * @memberof UI
+         */
+        UI.prototype.addCommon = function (commonType, args) {
+            var commonInst = this.getTypeInst(commonType, null, args, UIType.COMMON);
+            dragon.Display.setFullDisplay(commonInst);
+            this._common.addChild(commonInst);
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMMON, commonInst));
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, commonInst));
+        };
+        /**
+         * 添加tips
+         * @private
+         * @param {*} tooltipType
+         * @param {*} args
+         * @memberof UI
+         */
+        UI.prototype.addTooltip = function (tooltipType, args) {
+            var tooltipInst = this.getTypeInst(tooltipType, null, args, UIType.TOOLTIP);
+            dragon.Display.setFullDisplay(tooltipInst);
+            this._tooltip.addChild(tooltipInst);
+            if (egret.is(tooltipInst, 'dragon.BaseComponent')) {
+                this.dispatchEvent(new UIEvent(UIEvent.ADD_TOOLTIP, tooltipInst));
+                this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, tooltipInst));
+            }
+        };
+        /**
+         * 添加场景
+         * @private
+         * @param {*} sceneType
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        UI.prototype.runScene = function (sceneType, args) {
+            if (is.truthy(this._sceneInst)) {
+                this.remove(this._sceneInst, null, false);
+            }
+            var result = this.addScene(sceneType, true, args);
+            return result;
+        };
+        /**
+         * 添加定级场景
+         * @private
+         * @param {*} sceneType
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        UI.prototype.runTopScene = function (sceneType, args) {
+            if (is.truthy(this._sceneInst)) {
+                this.remove(this._sceneInst, null, false);
+            }
+            var result = this.addScene(sceneType, true, args);
+            return result;
+        };
+        /**
+         * 添加场景（普通场景和顶级场景）
+         * @private
+         * @param {*} sceneType
+         * @param {boolean} isUnderScene
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        UI.prototype.addScene = function (sceneType, isUnderScene, args) {
+            this.sceneHistory.pushHistory(this.sceneHistory, args, isUnderScene);
+            var sceneInst = this.getTypeInst(sceneType, dragon.getSetting().SceneAnimation, args, UIType.SCENE);
+            dragon.Display.setFullDisplay(sceneInst);
+            if (isUnderScene) {
+                this._scene.addChild(sceneInst);
+            }
+            else {
+                this._topScene.addChild(sceneInst);
+            }
+            this._sceneInst.setHistoryComponent(true);
+            this._menu.visible = isUnderScene;
+            this.dispatchEvent(new UIEvent(UIEvent.RUN_SCENE, sceneInst));
+            this.dispatchEvent(new UIEvent(UIEvent.ADD_COMPONENT, sceneInst));
+            return sceneInst;
+        };
+        /**
+         * 移除
+         * @private
+         * @param {*} instance
+         * @param {boolean} [isHistory=null]
+         * @param {boolean} [checkHistory=true]
+         * @memberof UI
+         */
+        UI.prototype.remove = function (instance, isHistory, checkHistory) {
+            var _this = this;
+            if (isHistory === void 0) { isHistory = null; }
+            if (checkHistory === void 0) { checkHistory = true; }
+            var gotoHistory = isHistory;
+            if (!isHistory && instance.isHistoryComponent()) {
+                gotoHistory = true;
+            }
+            if (instance.isType(UIType.BOX) === true) {
+                this.onExit(instance, true);
+                if (checkHistory) {
+                    this.checkHistory(gotoHistory, this.boxHistory, function (item) {
+                        _this.addHistoryBox(item.type, item.args);
+                    });
+                }
+            }
+            else if (instance.isType(UIType.SCENE) === true) {
+                this.onExit(instance, true);
+                if (checkHistory) {
+                    this.checkHistory(gotoHistory, this.sceneHistory, function (item) {
+                        return _this.addScene(item.type, item.isUnder, item.args);
+                    });
+                }
+            }
+            else if (instance.isType(UIType.PANEL) === true) {
+                this.hidePanel(instance);
+                if (checkHistory) {
+                    this.checkHistory(gotoHistory, this.panelHistory, function (item) {
+                        _this.resetHookList(_this.showHistoryPanel(item.type, item.args), item.hookList);
+                    });
+                }
+            }
+            else {
+                this.onExit(instance, true);
+            }
+            if (instance.isType(UIType.BOX) === true) {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_BOX, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+                this.onRemoveBox(instance);
+            }
+            else if (instance.isType(UIType.SCENE) === true) {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_SCENE, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+            }
+            else if (instance.isType(UIType.MENU) === true) {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_MENU, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+            }
+            else if (instance.isType(UIType.GUIDE) === true) {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_GUIDE, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+            }
+            else if (instance.isType(UIType.TOOLTIP) === true) {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_TOOLTIP, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+            }
+            else if (instance.isType(UIType.COMMON) === true) {
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMMON, instance));
+                this.dispatchEvent(new UIEvent(UIEvent.REMOVE_COMPONENT, instance));
+            }
+        };
+        /**
+         * 显示记录面板
+         * @private
+         * @param {*} type
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        UI.prototype.showHistoryPanel = function (type, args) {
+            var hookList = [];
+            var hook = {
+                setData: function (data, type) {
+                    hookList.push({ action: HookAction.SET_DATA, data: data, type: type });
+                }, addOperate: function (operate) {
+                    hookList.push({ action: HookAction.ADD_OPERATE, operate: operate, data: operate.serialize() });
+                }
+            };
+            this.panelHistory.pushHistory(type, args, false, hookList);
+            var panel = this.showPanel(type, args);
+            panel.hook = hook;
+            panel.setHistoryComponent(true);
+            return panel;
+        };
+        /**
+         * 显示记录弹框
+         * @private
+         * @param {*} boxType
+         * @param {*} args
+         * @memberof UI
+         */
+        UI.prototype.addHistoryBox = function (boxType, args) {
+            for (var i = this._box.numChildren - 1; i >= 0; i--) {
+                var boxInst = this._box.getChildAt(i);
+                if (boxInst.isHistoryComponent() === true) {
+                    dragon.Display.removeFromParent(boxInst, true);
+                }
+            }
+            this.boxHistory.pushHistory(boxType, args, false);
+            var box = this.addBox(boxType, args);
+            box.setHistoryComponent(true);
+        };
+        /**
+         * 记录检查
+         * @private
+         * @param {boolean} gotoHistory
+         * @param {UIHistory} history
+         * @param {Function} gotoBackFun
+         * @returns {void}
+         * @memberof UI
+         */
+        UI.prototype.checkHistory = function (gotoHistory, history, gotoBackFun) {
+            if (!history) {
+                return;
+            }
+            if (gotoHistory && history.hasHistory()) {
+                history.popHistory();
+                var item = history.getLastItem();
+                if (item) {
+                    gotoBackFun(item);
+                }
+            }
+            else {
+                history.clear();
+            }
+        };
+        /**
+         * 重置面板的钩子列表
+         * @private
+         * @param {BaseComponent} panel
+         * @param {any[]} hookList
+         * @memberof UI
+         */
+        UI.prototype.resetHookList = function (panel, hookList) {
+            for (var i = 0; i < hookList.length; i++) {
+                var item = hookList[i];
+                if (item.action == HookAction.SET_DATA) {
+                    panel.setData(item.data, item.type);
+                }
+                else if (item.action == HookAction.ADD_OPERATE) {
+                    var data = item.data;
+                    item.operate.unserialize(data);
+                    panel.addOperate(item.operate);
+                }
+            }
+        };
+        /**
+         * 添加序列弹框
+         * @private
+         * @param {*} boxType
+         * @param {string} group
+         * @param {number} priority
+         * @param {*} args
+         * @param {string} [type=null]
+         * @memberof UI
+         */
+        UI.prototype.addSequnceBox = function (boxType, group, priority, args, type) {
+            if (type === void 0) { type = null; }
+            if (!this._sequenceBoxMap.hasOwnProperty(group)) {
+                this._sequenceBoxMap[group] = [];
+            }
+            var arr = this._sequenceBoxMap[group];
+            var obj = { boxType: boxType, group: group, args: args, priority: priority, type: type };
+            if (!arr.length && group == '__normal__') {
+                this.runSeqBox(arr, group, obj);
+            }
+            else {
+                arr.push(obj);
+                if (priority != -9999) {
+                    arr = arr.sort(function (a, b) {
+                        return b.priority - a.priority;
+                    });
+                }
+            }
+        };
+        UI.prototype.getSequnceCount = function (group) {
+            var arr = this._sequenceBoxMap[group];
+            if (arr && arr.length > 0) {
+                return arr.length;
+            }
+            return 0;
+        };
+        UI.prototype.runSequnceBox = function (group) {
+            var arr = this._sequenceBoxMap[group];
+            if (arr && arr.length > 0) {
+                var top_1 = arr.shift();
+                this.runSeqBox(arr, group, top_1);
+            }
+        };
+        UI.prototype.runSeqBox = function (arr, group, top) {
+            var _this = this;
+            var box = null;
+            if (top.type == 'fun') {
+                box = top.args[0];
+                egret.callLater(function () {
+                    box(function () {
+                        _this.onRemoveBox(box);
+                    });
+                }, this);
+            }
+            else {
+                box = this.addBox(top.boxType, top.args);
+            }
+            box['__box_group__'] = group;
+            arr.push(box);
+        };
+        UI.prototype.onRemoveBox = function (box) {
+            var group = box['__box_group__'];
+            if (group) {
+                var arr = this._sequenceBoxMap[group];
+                if (arr) {
+                    var idx = arr.indexOf(box);
+                    if (idx > -1) {
+                        arr.splice(idx, 1);
+                    }
+                    if (!arr.length) {
+                        delete this._sequenceBoxMap[group];
+                        this.dispatchEvent(new UIEvent(UIEvent.CLEAR_SEQUENCE_BOX, null, group));
+                    }
+                    else {
+                        var top_2 = arr.shift();
+                        this.runSeqBox(arr, group, top_2);
+                    }
+                }
+            }
+        };
+        /**
+         * 根据名称获取组件
+         * @private
+         * @param {string} name
+         * @param {egret.DisplayObjectContainer} container
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        UI.prototype.getComponentByName = function (name, container) {
+            var num = container.numChildren;
+            for (var i = 0; i < num; i++) {
+                var child = container.getChildAt(i);
+                if (child.componentName == name) {
+                    return child;
+                }
+            }
+            return null;
+        };
+        /**
+         * 获取组件
+         * @param {string} name
+         * @returns {IComponent}
+         * @memberof UI
+         */
+        UI.prototype.getComponent = function (name) {
+            var pullComponent = dragon.pullObject(dragon.NoticeNameKey.GetComponent, name);
+            if (pullComponent && pullComponent != name) {
+                return pullComponent;
+            }
+            for (var i = 0; i < this._containerArr.length; i++) {
+                var container = this._containerArr[i];
+                var component = this.getComponentByName(name, container);
+                if (component) {
+                    return component;
+                }
+            }
+            return null;
+        };
+        /**
+         * 根据组件名，移除组件
+         * @param {string} name
+         * @memberof UI
+         */
+        UI.prototype.removeComponent = function (name) {
+            var obj = this.getComponent(name);
+            if (egret.is(obj, 'BaseComponent')) {
+                if (!this.isSingleContainer(obj)) {
+                    this.remove(obj);
+                }
+            }
+        };
+        /**
+         * 根据 UI 类型获取对应的层级的显示容器
+         * @param {UIType} type
+         * @returns {fairygui.UIContainer}
+         * @memberof UI
+         */
+        UI.prototype.getContainerByType = function (type) {
+            switch (type) {
+                case UIType.SCENE: return this._scene;
+                case UIType.COMMON: return this._common;
+                case UIType.PANEL: return this._panel;
+                case UIType.MENU: return this._menu;
+                case UIType.TOPSCENE: return this._topScene;
+                case UIType.BOX: return this._box;
+                case UIType.GUIDE: return this._guide;
+                case UIType.TOOLTIP: return this._tooltip;
+            }
+            return null;
+        };
+        /**
+         * 是否存在面板显示着
+         * @returns {boolean}
+         * @memberof UI
+         */
+        UI.prototype.hasPanel = function () {
+            var panel = this._panel;
+            var num = this._panel.numChildren;
+            for (var i = 0; i < num; i++) {
+                var child = panel.getChildAt(i);
+                if (child.visible) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        /**
+         * 判断组件是否是场景容器或者菜单容器
+         * @private
+         * @param {*} component
+         * @returns {boolean}
+         * @memberof UI
+         */
+        UI.prototype.isSingleContainer = function (component) {
+            if (component.isType(UIType.SCENE) && component.isType(UIType.MENU)) {
+                return true;
+            }
+            return false;
+        };
+        Object.defineProperty(UI.prototype, "boxHistory", {
+            /**
+             * 弹框记录列表
+             * @readonly
+             * @type {UIHistory}
+             * @memberof UI
+             */
+            get: function () {
+                return dragon.typeSingleton('__UI_BOX__', UIHistory);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(UI.prototype, "panelHistory", {
+            /**
+             * 面板记录列表
+             * @readonly
+             * @type {UIHistory}
+             * @memberof UI
+             */
+            get: function () {
+                return dragon.typeSingleton('__UI_PANEL_', UIHistory);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(UI.prototype, "sceneHistory", {
+            /**
+             * 场景记录列表
+             * @readonly
+             * @type {UIHistory}
+             * @memberof UI
+             */
+            get: function () {
+                return dragon.typeSingleton('__UI_SCENE__', UIHistory);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 设置根容器
+         * @private
+         * @param {egret.DisplayObjectContainer} container
+         * @memberof UI
+         */
+        UI.prototype.setRoot = function (container) {
+            if (container) {
+                container.addChild(this);
+            }
+        };
+        // public static getComponent<T extends IComponent>(name: string): T;
+        UI.getComponent = function (name) {
+            return dragon.singleton(UI).getComponent(name);
+        };
+        UI.panelIsDisplay = function (name) {
+            return dragon.singleton(UI).panelIsDisplay(name);
+        };
+        UI.hasPanel = function () {
+            return dragon.singleton(UI).hasPanel();
+        };
+        UI.removeByName = function (name) {
+            dragon.singleton(UI).removeComponent(name);
+        };
+        UI.setMenu = function (type) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            dragon.singleton(UI).setMenu(type, args);
+        };
+        UI.addGuide = function (type) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            return dragon.singleton(UI).addGuide(type, args);
+        };
+        UI.addBox = function (type) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            return dragon.singleton(UI).addBox(type, args);
+        };
+        UI.showPanel = function (type) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            return dragon.singleton(UI).showPanel(type, args);
+        };
+        UI.addCommon = function (type) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            dragon.singleton(UI).addCommon(type, args);
+        };
+        UI.addTooltip = function (type) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            dragon.singleton(UI).addTooltip(type, args);
+        };
+        UI.runTopScene = function (sceneType) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            return dragon.singleton(UI).runTopScene(sceneType, args);
+        };
+        UI.runScene = function (sceneType) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            return dragon.singleton(UI).runScene(sceneType, args);
+        };
+        UI.addSequenceBox = function (type) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            dragon.singleton(UI).addSequnceBox(type, '_normal_', -99999, args);
+        };
+        UI.getSequenceCount = function (group) {
+            return dragon.singleton(UI).getSequnceCount(group);
+        };
+        UI.addHistoryBox = function (type) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            dragon.singleton(UI).addHistoryBox(type, args);
+        };
+        UI.showHistoryPanel = function (type) {
+            var args = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                args[_i - 1] = arguments[_i];
+            }
+            return dragon.singleton(UI).showHistoryPanel(type, args);
+        };
+        UI.runGroupSequenceBox = function (group) {
+            dragon.singleton(UI).runSequnceBox(group);
+        };
+        UI.injectPanel = function (name, type) {
+            var args = [];
+            for (var _i = 2; _i < arguments.length; _i++) {
+                args[_i - 2] = arguments[_i];
+            }
+            args.unshift(name);
+            dragon.singleton(UI).injectPanel(name, type, args);
+        };
+        UI.addEventListener = function (type, func, context) {
+            dragon.singleton(UI).addEventListener(type, func, context);
+        };
+        UI.once = function (type, func, context) {
+            dragon.singleton(UI).once(type, func, context);
+        };
+        UI.removeEventListener = function (type, func, context) {
+            dragon.singleton(UI).removeEventListener(type, func, context);
+        };
+        UI.remove = function (instance, gotoHistory) {
+            if (gotoHistory === void 0) { gotoHistory = null; }
+            dragon.singleton(UI).remove(instance, gotoHistory);
+        };
+        UI.addGroupSequenceBox = function (type, group, priority) {
+            var args = [];
+            for (var _i = 3; _i < arguments.length; _i++) {
+                args[_i - 3] = arguments[_i];
+            }
+            dragon.singleton(UI).addSequnceBox(type, group, priority, args);
+        };
+        UI.addGroupSequenceFun = function (fun, group, priority) {
+            dragon.singleton(UI).addSequnceBox(null, group, priority, [fun], 'fun');
+        };
+        UI.clearBox = function () {
+            dragon.singleton(UI).clearBox();
+        };
+        UI.getMenu = function () {
+            var ui = dragon.singleton(UI)._menuInst;
+            return ui;
+        };
+        UI.getScene = function () {
+            var ui = dragon.singleton(UI)._sceneInst;
+            return ui;
+        };
+        UI.getContainerByType = function (type) {
+            return dragon.singleton(UI).getContainerByType(type);
+        };
+        UI.hidePanel = function (panel) {
+            dragon.singleton(UI).hidePanel(panel);
+        };
+        Object.defineProperty(UI, "panelHistory", {
+            get: function () {
+                return dragon.singleton(UI).panelHistory;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        UI.setBoxVisible = function (visible, without) {
+            if (without === void 0) { without = null; }
+            var u = dragon.singleton(UI);
+            for (var i = 0, len = u._box.numChildren; i < len; i++) {
+                if (u._box.getChildAt(i) != without) {
+                    u._box.getChildAt(i).visible = visible;
+                }
+            }
+        };
+        UI.setRoot = function (container) {
+            dragon.singleton(UI).setRoot(container);
+        };
+        return UI;
+    }(fairygui.UIContainer));
+    dragon.UI = UI;
 })(dragon || (dragon = {}));
 /**
  * 配置数据操作
@@ -1416,6 +3315,25 @@ var dragon;
     });
 })(dragon || (dragon = {}));
 /**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 全局事件名 Key 值
+     * @export
+     * @class NoticeNameKey
+     */
+    var NoticeNameKey = /** @class */ (function () {
+        function NoticeNameKey() {
+        }
+        NoticeNameKey.GetComponent = "get_component";
+        return NoticeNameKey;
+    }());
+    dragon.NoticeNameKey = NoticeNameKey;
+    dragon.key = NoticeNameKey;
+})(dragon || (dragon = {}));
+/**
  * 游戏框架的基础配置设置
  * @author Andrew_Huang
  */
@@ -1541,8 +3459,8 @@ var dragon;
             var gameConf = dragon.Obj.getValue(config, "GameConfig");
             dragon.singleton(Setting).init(gameConf);
             var modules = dragon.Obj.getValue(config, "Modules");
-            for (var key in modules) {
-                var moduleVal = modules[key];
+            for (var key_4 in modules) {
+                var moduleVal = modules[key_4];
                 var className = moduleVal["Setting"];
                 if (className) {
                     var definition = egret.getDefinitionByName(className);
@@ -1559,6 +3477,37 @@ var dragon;
         return dragon.singleton(Setting);
     }
     dragon.getSetting = getSetting;
+})(dragon || (dragon = {}));
+/**
+ * @author Andrew_Huang
+ */
+var dragon;
+(function (dragon) {
+    /**
+     * 对象的一个属性发生更改时传递到事件侦听器的事件
+     * @export
+     * @class PropertyEvent
+     * @extends {egret.Event}
+     */
+    var PropertyEvent = /** @class */ (function (_super) {
+        __extends(PropertyEvent, _super);
+        function PropertyEvent(type, bubbles, cancelable, property) {
+            return _super.call(this, type, bubbles, cancelable, property) || this;
+        }
+        PropertyEvent.dispatchPropertyEvent = function (target, eventType, property) {
+            if (!target.hasEventListener(eventType)) {
+                return true;
+            }
+            var event = egret.Event.create(PropertyEvent, eventType);
+            event.property = property;
+            var result = target.dispatchEvent(event);
+            egret.Event.release(event);
+            return result;
+        };
+        PropertyEvent.PROPERTY_CHANGE = "PROPERTY_CHANGE";
+        return PropertyEvent;
+    }(egret.Event));
+    dragon.PropertyEvent = PropertyEvent;
 })(dragon || (dragon = {}));
 /**
  * @author Andrew_Huang
@@ -1652,8 +3601,8 @@ var dragon;
          */
         BaseNotice.prototype.removeObserver = function (name, callback, context) {
             var observers = this._nameObs[name];
-            for (var key in observers) {
-                var obs = observers[key];
+            for (var key_5 in observers) {
+                var obs = observers[key_5];
                 dragon.array.remove(obs, function (item) {
                     return item.callback == callback && item.context == context;
                 });
@@ -1669,8 +3618,8 @@ var dragon;
                 return;
             }
             var typeId = dragon.getTypeId(context);
-            for (var key in this._nameObs) {
-                var obsMap = this._nameObs[key];
+            for (var key_6 in this._nameObs) {
+                var obsMap = this._nameObs[key_6];
                 if (obsMap.hasOwnProperty(typeId)) {
                     delete obsMap[typeId];
                 }
@@ -1724,8 +3673,8 @@ var dragon;
             var observers = this._nameObs[name];
             if (observers) {
                 var arr = [];
-                for (var key in observers) {
-                    var obsArr = observers[key];
+                for (var key_7 in observers) {
+                    var obsArr = observers[key_7];
                     arr = arr.concat(obsArr);
                 }
                 arr.sort(function (a, b) {
@@ -1860,8 +3809,8 @@ var dragon;
         PullObject.prototype._pullObject = function (name, args, idx) {
             if (idx === void 0) { idx = 0; }
             var observers = this._nameObs[name];
-            for (var key in observers) {
-                var obsArr = observers[key];
+            for (var key_8 in observers) {
+                var obsArr = observers[key_8];
                 for (var i = 0; i < obsArr.length; i++) {
                     var obs = obsArr[i];
                     var result = obs.callback.call(obs.context, args);
@@ -2470,6 +4419,71 @@ var dragon;
     var Display = /** @class */ (function () {
         function Display() {
         }
+        Object.defineProperty(Display, "stageH", {
+            /**
+             * 舞台高
+             * @readonly
+             * @static
+             * @type {number}
+             * @memberof Display
+             */
+            get: function () {
+                //dragon.stage.stageHeight
+                return dragon.GRootStage.stageH;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Display, "stageW", {
+            /**
+             * 舞台宽
+             * @readonly
+             * @static
+             * @type {number}
+             * @memberof Display
+             */
+            get: function () {
+                // dragon.stage.stageWidth
+                return dragon.GRootStage.stageW;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * 销毁 container 所有的子元素
+         * @static
+         * @param {*} container
+         * @memberof Display
+         */
+        Display.destroyChildren = function (container) {
+        };
+        /**
+         * 设置 display 的尺寸，满屏显示
+         * @static
+         * @param {egret.DisplayObject} display
+         * @memberof Display
+         */
+        Display.setFullDisplay = function (display) {
+            display.width = this.stageW;
+            display.height = this.stageH;
+        };
+        /**
+         * 从父级移除 child
+         * @param {(egret.DisplayObject | dragon.BaseComponent)} child
+         * @param {boolean} [forceRemove=false]
+         * @memberof Display
+         */
+        Display.removeFromParent = function (child, forceRemove) {
+            if (forceRemove === void 0) { forceRemove = false; }
+            if (!forceRemove && egret.is(child, 'dragon.BaseComponent')) {
+                dragon.UI.remove(child);
+            }
+            else {
+                if (is.truthy(child) && child.parent) {
+                    child.parent.removeChild(child);
+                }
+            }
+        };
         return Display;
     }());
     dragon.Display = Display;
@@ -2987,8 +5001,8 @@ var dragon;
          */
         Obj.keys = function (obj) {
             var keys = [];
-            for (var key in obj) {
-                keys.push(key);
+            for (var key_9 in obj) {
+                keys.push(key_9);
             }
             return keys;
         };
@@ -3024,8 +5038,8 @@ var dragon;
             }
             var obj = Object(object);
             for (var i = 0; i < len; i++) {
-                var key = keys[i];
-                if (attrs[key] !== obj[key] || !(key in obj)) {
+                var key_10 = keys[i];
+                if (attrs[key_10] !== obj[key_10] || !(key_10 in obj)) {
                     return false;
                 }
             }
@@ -3121,16 +5135,16 @@ var dragon;
             var keyArr = key.split('.');
             var curObj = data;
             for (var i = 0; i < keyArr.length; i++) {
-                var key_1 = keyArr[i];
+                var key_11 = keyArr[i];
                 if (is.array(curObj)) {
-                    curObj = curObj[parseInt(key_1)];
+                    curObj = curObj[parseInt(key_11)];
                 }
                 else {
-                    if (key_1 == '') {
+                    if (key_11 == '') {
                         curObj = curObj;
                     }
                     else {
-                        curObj = curObj[key_1];
+                        curObj = curObj[key_11];
                     }
                 }
                 if (is.not.existy(curObj)) {
@@ -3428,9 +5442,9 @@ var dragon;
          */
         Str.replaceFromObject = function (str, args) {
             if (is.object(args)) {
-                for (var key in args) {
-                    var search = '{' + key + '}';
-                    var replace = '' + args[key];
+                for (var key_12 in args) {
+                    var search = '{' + key_12 + '}';
+                    var replace = '' + args[key_12];
                     str = this.replaceAll(str, search, replace);
                 }
             }

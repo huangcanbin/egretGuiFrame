@@ -650,7 +650,897 @@ declare module dragon {
     }
 }
 declare module dragon {
-    class BaseComponent {
+    /**
+     * 组件通用接口
+     * @export
+     * @interface IComponent
+     */
+    interface IComponent {
+        onEnter(...args: any[]): void;
+        onExit(): void;
+        listener(component: BaseComponent, callback: (e: egret.Event) => void): void;
+        setData(data: any, type?: any): IComponent;
+        setComName(): IComponent;
+        autoId: any;
+    }
+    /**
+     * 组件操作状态（进入和退出）
+     * @export
+     * @enum {number}
+     */
+    enum OperateState {
+        enter = 0,
+        exit = 1,
+    }
+    /**
+     * 组件钩子
+     * @export
+     * @interface IComponentHook
+     */
+    interface IComponentHook {
+        setData(data: any, type?: any): void;
+        addOperate(operate: IComponentOperate<any>): void;
+    }
+    /**
+     * 基础UI组件
+     * @export
+     * @class BaseComponent
+     * @extends {egret.EventDispatcher}
+     * @implements {IComponent}
+     * @implements {dragon.IUIAnimationDisplay}
+     */
+    class BaseComponent extends egret.DisplayObjectContainer implements IComponent, dragon.IUIAnimationDisplay {
+        private _displayObject;
+        private $_anim;
+        private $_data;
+        private $_state;
+        private $_componentState;
+        private _operates;
+        private _componentName;
+        private _dataMapArr;
+        private _hook;
+        private _type;
+        private _isHistoryComponent;
+        constructor(...args: any[]);
+        readonly displayObject: egret.DisplayObject;
+        readonly display: fairygui.GComponent;
+        skinName: string;
+        ckearListeners(): void;
+        /**
+         * 设置参数
+         * @param {*} args
+         * @memberof BaseComponent
+         */
+        setArgs(args: any): void;
+        /**
+         * 进入
+         * @param {any} args
+         * @memberof BaseComponent
+         */
+        onEnter(...args: any[]): void;
+        /**
+         * 退出
+         * @memberof BaseComponent
+         */
+        onExit(): void;
+        listener(component: BaseComponent, callback: (e: egret.Event) => void): void;
+        /**
+         * 设置数据
+         * @param {*} data
+         * @param {*} [type]
+         * @returns {IComponent}
+         * @memberof BaseComponent
+         */
+        setData(data: any, type?: any): IComponent;
+        setComName(): IComponent;
+        private pullData();
+        /**
+         * 获取动画的显示容器
+         * @param {UI_TYPE} [type]
+         * @memberof BaseComponent
+         */
+        getAnimationDisplay(type?: UI_TYPE): egret.DisplayObject;
+        /**
+         * 获取子显示层
+         * @private
+         * @param {string} name
+         * @returns {*}
+         * @memberof BaseComponent
+         */
+        private getSubView(name);
+        data: any;
+        private addDataMap(name);
+        protected dataChanged(): void;
+        /**
+         * 添加操作
+         * @param {IComponentOperate<any>} operate
+         * @returns {BaseComponent}
+         * @memberof BaseComponent
+         */
+        addOperate(operate: IComponentOperate<any>): BaseComponent;
+        /**
+         * 移除操作
+         * @param {IComponentOperate<any>} operate
+         * @memberof BaseComponent
+         */
+        removeOperate(operate: IComponentOperate<any>): void;
+        /**
+         * 根据操作名删除操作
+         * @param {string} name
+         * @memberof BaseComponent
+         */
+        removeOperateByName(name: string): void;
+        /**
+         * 根据操作名获取操作列表
+         * @param {string} name
+         * @returns {IComponentOperate<any>[]}
+         * @memberof BaseComponent
+         */
+        getOperateByName(name: string): IComponentOperate<any>[];
+        /**
+         * 根据类型名获取操作列表
+         * @param {string} type
+         * @returns {IComponentOperate<any>[]}
+         * @memberof BaseComponent
+         */
+        getOperateByType(type: string): IComponentOperate<any>[];
+        operatesIsComplete(): boolean;
+        setOperatesComplete(): void;
+        /**
+         * 清理所有操作
+         * @memberof BaseComponent
+         */
+        clearOperate(): void;
+        /**
+         * 销毁数据
+         * @memberof BaseComponent
+         */
+        destroyData(): void;
+        /**
+         * 为组件设置动画类
+         * @memberof BaseComponent
+         */
+        animation: dragon.IUIAnimation;
+        setHistoryComponent(isHistory: boolean): void;
+        setType(type: dragon.UIType): void;
+        isType(type: dragon.UIType): boolean;
+        isHistoryComponent(): boolean;
+        readonly autoId: any;
+        readonly componentState: OperateState;
+        componentName: string;
+        hook: IComponentHook;
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     *
+     * @export
+     * @interface IComponentOperate
+     * @template T
+     */
+    interface IComponentOperate<T> {
+        type: string;
+        state: OperateState;
+        isComplete: boolean;
+        setComplete(): void;
+        getName(): string;
+        setName(val: string): T;
+        serialize(): any;
+        unserialize(data: any): void;
+        enter(component: BaseComponent): void;
+        exit(component: BaseComponent): void;
+    }
+    /**
+     *
+     * @export
+     * @class BaseOperate
+     * @extends {egret.HashObject}
+     * @implements {IComponentOperate<T>}
+     * @template T
+     */
+    class BaseOperate<T> extends egret.HashObject implements IComponentOperate<T> {
+        private _name;
+        private _state;
+        private _complete;
+        state: OperateState;
+        protected getType(): string;
+        readonly type: string;
+        setComplete(): void;
+        protected getIsComplete(): boolean;
+        readonly isComplete: boolean;
+        getName(): string;
+        setName(val: string): T;
+        serialize(): any;
+        unserialize(data: any): void;
+        enter(component: BaseComponent): void;
+        exit(component: BaseComponent): void;
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 组件状态（添加与移除）
+     * @export
+     * @class ComponentState
+     */
+    class ComponentState {
+        private _component;
+        private _args;
+        private _listeners;
+        constructor(component: dragon.BaseComponent);
+        getArgs(): any;
+        setArgs(args: any): void;
+        listener(component: dragon.BaseComponent, callback: (e: egret.Event) => void): void;
+        onAddToStage(): void;
+        onRemovedFromStage(): void;
+        clearListeners(): void;
+        private getComponent(id);
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 资源加载组接口
+     * @export
+     * @interface IResourceGroup
+     */
+    interface IResourceGroup {
+        getRes(): any[];
+        name: string;
+    }
+    /**
+     * 资源加载
+     * @export
+     * @class ResourceLoad
+     * @implements {dragon.ILoad}
+     */
+    class ResourceLoad implements dragon.ILoad {
+        private _resourceGroup;
+        private _loadUpdate;
+        constructor(resource: IResourceGroup);
+        loadUpdate: ILoadUpdate;
+        /**
+         * 资源加载
+         * @memberof ResourceLoad
+         */
+        load(): void;
+        /**
+         * 加载完成
+         * @private
+         * @param {RES.ResourceEvent} event
+         * @memberof ResourceLoad
+         */
+        private onLoaded(event);
+        /**
+         * 加载中
+         * @private
+         * @param {RES.ResourceEvent} event
+         * @memberof ResourceLoad
+         */
+        private onProgress(event);
+    }
+}
+/**
+ * @author Andrew_Huang
+ * tip和confirm相关接口
+ */
+declare module dragon {
+    /**
+     * tip 信息
+     * @export
+     * @interface TooltipInfo
+     */
+    interface TooltipInfo {
+        text: string;
+        size?: number;
+        color?: number;
+        delay?: number;
+    }
+    /**
+     * 确认框按钮类型
+     * @export
+     * @enum {number}
+     */
+    enum ConfirmButton {
+        close = 0,
+        yes = 1,
+        no = 2,
+    }
+    /**
+     * 确认框信息
+     * @export
+     * @interface ConfirmInfo
+     */
+    interface ConfirmInfo {
+        test: string;
+        title?: string;
+        size?: number;
+        close?: boolean;
+        subConfirmVioew?: string;
+        confirView?: string;
+        yes?: string;
+        no?: string;
+        args?: any;
+    }
+    /**
+     * tooltip 实现接口
+     * @export
+     * @interface ITooltip
+     */
+    interface ITooltip {
+        show(info: TooltipInfo | string, skinName?: string): void;
+        customView(skinName: string, data: any, delay?: number): void;
+        skinName: string;
+    }
+    /**
+     * 简易加载条的显示与关闭接口方法
+     * @export
+     * @interface ISimpleLoading
+     */
+    interface ISimpleLoading {
+        show(): void;
+        hide(): void;
+    }
+    /**
+     * 更新加载进度
+     * @export
+     * @interface ILoadUpdate
+     */
+    interface ILoadUpdate {
+        update(current: number, total: number): void;
+        onComplete(): void;
+    }
+    /**
+     * 加载接口
+     * @export
+     * @interface ILoad
+     */
+    interface ILoad {
+        loadUpdate: ILoadUpdate;
+        load(): void;
+    }
+    interface IProgressLoading extends ISimpleLoading, ILoadUpdate {
+        load: ILoad;
+        setComplete(sel: () => void, contex?: any): void;
+    }
+    /**
+     * 弹框实现接口
+     * @export
+     * @interface IConfirm
+     */
+    interface IConfirm {
+        show(callback: (btn: ConfirmButton) => void, contex: any): void;
+    }
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 显示简单加载条
+     * @export
+     */
+    function showSimpleLoading(): void;
+    /**
+     * 隐藏简单加载条
+     * @export
+     */
+    function hideSimpleLoading(): void;
+    /**
+     * 获取资源加载实例
+     * @export
+     * @param {(ILoad | IResourceGroup)} prepare
+     * @returns {ILoad}
+     */
+    function getResLoad(prepare: ILoad | IResourceGroup): ILoad;
+    /**
+     * 显示进度条
+     * @export
+     * @param {(ILoad | IResourceGroup)} prepare 加载器
+     * @param {string} [skinName='']             加载条的皮肤名
+     * @returns {*}
+     */
+    function showProgressLoading(prepare: ILoad | IResourceGroup, skinName?: string): any;
+    /**
+     * 显示加载场景界面
+     * @export
+     * @param {(ILoad | IResourceGroup)} scene
+     * @returns {*}
+     */
+    function showLoadScene(scene: ILoad | IResourceGroup): any;
+    /**
+     * 隐藏进度加载
+     * @export
+     * @param {string} skinName
+     */
+    function hideProgressLoading(skinName: string): void;
+    /**
+     * 显示浮动 tip 提示
+     * @export
+     * @param {(dragon.TooltipInfo | string)} info
+     * @param {string} [skinName]
+     */
+    function tooltip(info: dragon.TooltipInfo | string, skinName?: string): void;
+    function customTooltip(skinName: string, data: any, delay?: number): void;
+    enum BoxType {
+        Box = 0,
+        HistoryBox = 1,
+        SequnceBox = 2,
+        GroupSequnceBox = 3,
+    }
+    /**
+     * 弹出提示框
+     * @export
+     * @param {(ConfirmInfo | string)} info
+     * @param {BoxType} [boxType=BoxType.Box]
+     * @param {any} args
+     * @returns {*}
+     */
+    function confirm(info: ConfirmInfo | string, boxType?: BoxType, ...args: any[]): any;
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    enum HookAction {
+        SET_DATA = 0,
+        ADD_OPERATE = 1,
+    }
+    interface IHookItemInfo {
+        action: HookAction;
+        data: any;
+        type?: any;
+        operate?: IComponentOperate<any>;
+    }
+    /**
+     * UI 记录Item
+     * @export
+     * @interface UIHistoryItem
+     */
+    interface UIHistoryItem {
+        type: any;
+        isUnder?: boolean;
+        args: any[];
+        hookList: any[];
+    }
+    /**
+     * UI 面板信息
+     * @export
+     * @interface UIPanelInfo
+     */
+    interface UIPanelInfo {
+        name: string;
+        type: any;
+        args: any[];
+    }
+    /**
+     * UI 层级类型
+     * @export
+     * @enum {number}
+     */
+    enum UIType {
+        MIN = 0,
+        TOOLTIP = 1,
+        GUIDE = 2,
+        BOX = 3,
+        TOPSCENE = 4,
+        MENU = 5,
+        PANEL = 6,
+        COMMON = 7,
+        SCENE = 8,
+        ANY = 9,
+    }
+    /**
+     * UI 事件
+     * @export
+     * @class UIEvent
+     * @extends {egret.Event}
+     */
+    class UIEvent extends egret.Event {
+        static SHOW_PANEL: string;
+        static HIDE_PANEL: string;
+        static ADD_BOX: string;
+        static CLEAR_SEQUENCE_BOX: string;
+        static REMOVE_BOX: string;
+        static RUN_SCENE: string;
+        static REMOVE_SCENE: string;
+        static SET_MENU: string;
+        static REMOVE_MENU: string;
+        static ADD_TOOLTIP: string;
+        static REMOVE_TOOLTIP: string;
+        static ADD_GUIDE: string;
+        static REMOVE_GUIDE: string;
+        static ADD_COMPONENT: string;
+        static REMOVE_COMPONENT: string;
+        static ADD_COMMON: string;
+        static REMOVE_COMMON: string;
+        private _component;
+        private _group;
+        readonly component: BaseComponent;
+        readonly group: string;
+        constructor(type: string, component: BaseComponent, group?: string);
+    }
+    /**
+     * UI 记录
+     * @export
+     * @class UIHistory
+     */
+    class UIHistory {
+        private _history;
+        constructor();
+        pushHistory(type: any, args: any[], isUnder: boolean, hookList?: any[]): void;
+        getLastItem(): UIHistoryItem;
+        count(): number;
+        hasHistory(): boolean;
+        clear(): void;
+        popHistory(): UIHistoryItem;
+    }
+    /**
+     * UI 控制器
+     * 层级从下往上:场景层、公共UI层、面板层、菜单层、弹框层、新手引导层、浮动层
+     * @export
+     * @class UI
+     * @extends {fairygui.UIContainer}
+     */
+    class UI extends fairygui.UIContainer {
+        private _scene;
+        private _common;
+        private _panel;
+        private _menu;
+        private _topScene;
+        private _box;
+        private _guide;
+        private _tooltip;
+        private _containerArr;
+        private _panelTypeMap;
+        private _panelInstanceMap;
+        private _currentPanel;
+        private _sequenceBoxMap;
+        private _sceneInst;
+        private _menuInst;
+        constructor();
+        /**
+         * 注入面板到控制器中
+         * @param {string} name 面板名称
+         * @param {*} type      面板类型
+         * @param {*} args      参数列表
+         * @memberof UI
+         */
+        private injectPanel(name, type, args);
+        /**
+         * 隐藏面板
+         * @param {*} [panel]
+         * @memberof UI
+         */
+        hidePanel(panel?: any): void;
+        /**
+         * 面板是否显示
+         * @param {string} name
+         * @returns {boolean}
+         * @memberof UI
+         */
+        panelIsDisplay(name: string): boolean;
+        /**
+         * 设置面板隐藏
+         * @private
+         * @param {BaseComponent} panel
+         * @memberof UI
+         */
+        private setPanelHide(panel);
+        /**
+         * 面板是否在实例映射表中
+         * @private
+         * @param {*} panel
+         * @returns {boolean}
+         * @memberof UI
+         */
+        private panelInInstanceMap(panel);
+        /**
+         * 退出，执行相关动画与移除操作
+         * @private
+         * @param {BaseComponent} component
+         * @param {boolean} remove
+         * @memberof UI
+         */
+        private onExit(component, remove);
+        /**
+         * 进入，执行相关动画操作
+         * @private
+         * @param {BaseComponent} component
+         * @memberof UI
+         */
+        private onEnter(component);
+        private showAnimation(component);
+        /**
+         * 清除所有的弹框
+         * @memberof UI
+         */
+        clearBox(): void;
+        /**
+         * 设置实例的动画
+         * @private
+         * @param {string} animationName 动画名
+         * @param {*} instance           实例
+         * @memberof UI
+         */
+        private setAnimation(animationName, instance);
+        /**
+         * 显示面板（面板名为字符串）
+         * @private
+         * @param {string} name
+         * @param {*} args
+         * @returns {*}
+         * @memberof UI
+         */
+        private _showPanel(name, args);
+        /**
+         * 添加面板层（面板名为非字符串）
+         * @private
+         * @param {*} panelType
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        private _addPanel(panelType, args);
+        /**
+         * 显示面板
+         * @private
+         * @param {*} panel
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        private showPanel(panel, args);
+        /**
+         * 获取类型实例
+         * @private
+         * @param {*} type            类型
+         * @param {string} animation  动画
+         * @param {any[]} args        参数
+         * @param {UIType} uiType     UI类型
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        private getTypeInst(type, animation, args, uiType);
+        /**
+         * 设置主菜单栏
+         * @private
+         * @param {*} menuTtype
+         * @param {*} args
+         * @memberof UI
+         */
+        private setMenu(menuTtype, args);
+        /**
+         * 添加引导层
+         * @private
+         * @param {*} guideType
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        private addGuide(guideType, args);
+        /**
+         * 添加弹框
+         * @private
+         * @param {*} boxType
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        private addBox(boxType, args);
+        /**
+         * 添加通用普通界面
+         * @private
+         * @param {*} commonType
+         * @param {*} args
+         * @memberof UI
+         */
+        private addCommon(commonType, args);
+        /**
+         * 添加tips
+         * @private
+         * @param {*} tooltipType
+         * @param {*} args
+         * @memberof UI
+         */
+        private addTooltip(tooltipType, args);
+        /**
+         * 添加场景
+         * @private
+         * @param {*} sceneType
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        private runScene(sceneType, args);
+        /**
+         * 添加定级场景
+         * @private
+         * @param {*} sceneType
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        private runTopScene(sceneType, args);
+        /**
+         * 添加场景（普通场景和顶级场景）
+         * @private
+         * @param {*} sceneType
+         * @param {boolean} isUnderScene
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        private addScene(sceneType, isUnderScene, args);
+        /**
+         * 移除
+         * @private
+         * @param {*} instance
+         * @param {boolean} [isHistory=null]
+         * @param {boolean} [checkHistory=true]
+         * @memberof UI
+         */
+        private remove(instance, isHistory?, checkHistory?);
+        /**
+         * 显示记录面板
+         * @private
+         * @param {*} type
+         * @param {*} args
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        private showHistoryPanel(type, args);
+        /**
+         * 显示记录弹框
+         * @private
+         * @param {*} boxType
+         * @param {*} args
+         * @memberof UI
+         */
+        private addHistoryBox(boxType, args);
+        /**
+         * 记录检查
+         * @private
+         * @param {boolean} gotoHistory
+         * @param {UIHistory} history
+         * @param {Function} gotoBackFun
+         * @returns {void}
+         * @memberof UI
+         */
+        private checkHistory(gotoHistory, history, gotoBackFun);
+        /**
+         * 重置面板的钩子列表
+         * @private
+         * @param {BaseComponent} panel
+         * @param {any[]} hookList
+         * @memberof UI
+         */
+        private resetHookList(panel, hookList);
+        /**
+         * 添加序列弹框
+         * @private
+         * @param {*} boxType
+         * @param {string} group
+         * @param {number} priority
+         * @param {*} args
+         * @param {string} [type=null]
+         * @memberof UI
+         */
+        private addSequnceBox(boxType, group, priority, args, type?);
+        private getSequnceCount(group);
+        private runSequnceBox(group);
+        private runSeqBox(arr, group, top);
+        private onRemoveBox(box);
+        /**
+         * 根据名称获取组件
+         * @private
+         * @param {string} name
+         * @param {egret.DisplayObjectContainer} container
+         * @returns {BaseComponent}
+         * @memberof UI
+         */
+        private getComponentByName(name, container);
+        /**
+         * 获取组件
+         * @param {string} name
+         * @returns {IComponent}
+         * @memberof UI
+         */
+        private getComponent(name);
+        /**
+         * 根据组件名，移除组件
+         * @param {string} name
+         * @memberof UI
+         */
+        removeComponent(name: string): void;
+        /**
+         * 根据 UI 类型获取对应的层级的显示容器
+         * @param {UIType} type
+         * @returns {fairygui.UIContainer}
+         * @memberof UI
+         */
+        getContainerByType(type: UIType): fairygui.UIContainer;
+        /**
+         * 是否存在面板显示着
+         * @returns {boolean}
+         * @memberof UI
+         */
+        hasPanel(): boolean;
+        /**
+         * 判断组件是否是场景容器或者菜单容器
+         * @private
+         * @param {*} component
+         * @returns {boolean}
+         * @memberof UI
+         */
+        private isSingleContainer(component);
+        /**
+         * 弹框记录列表
+         * @readonly
+         * @type {UIHistory}
+         * @memberof UI
+         */
+        readonly boxHistory: UIHistory;
+        /**
+         * 面板记录列表
+         * @readonly
+         * @type {UIHistory}
+         * @memberof UI
+         */
+        readonly panelHistory: UIHistory;
+        /**
+         * 场景记录列表
+         * @readonly
+         * @type {UIHistory}
+         * @memberof UI
+         */
+        readonly sceneHistory: UIHistory;
+        /**
+         * 设置根容器
+         * @private
+         * @param {egret.DisplayObjectContainer} container
+         * @memberof UI
+         */
+        private setRoot(container);
+        static getComponent(name: string): IComponent;
+        static panelIsDisplay(name: string): boolean;
+        static hasPanel(): boolean;
+        static removeByName(name: string): void;
+        static setMenu(type: any, ...args: any[]): void;
+        static addGuide(type: any, ...args: any[]): BaseComponent;
+        static addBox(type: any, ...args: any[]): BaseComponent;
+        static showPanel(type: any, ...args: any[]): BaseComponent;
+        static addCommon(type: any, ...args: any[]): void;
+        static addTooltip(type: any, ...args: any[]): void;
+        static runTopScene(sceneType: any, ...args: any[]): BaseComponent;
+        static runScene(sceneType: any, ...args: any[]): BaseComponent;
+        static addSequenceBox(type: any, ...args: any[]): void;
+        static getSequenceCount(group: string): number;
+        static addHistoryBox(type: any, ...args: any[]): void;
+        static showHistoryPanel(type: any, ...args: any[]): BaseComponent;
+        static runGroupSequenceBox(group: string): void;
+        static injectPanel(name: string, type: any, ...args: any[]): void;
+        static addEventListener(type: string, func: (e: egret.Event) => void, context?: any): void;
+        static once(type: string, func: (e: egret.Event) => void, context?: any): void;
+        static removeEventListener(type: string, func: (e: egret.Event) => void, context?: any): void;
+        static remove(instance: any, gotoHistory?: boolean): void;
+        static addGroupSequenceBox(type: any, group: string, priority: number, ...args: any[]): void;
+        static addGroupSequenceFun(fun: (callback: () => void) => void, group: string, priority: number): void;
+        static clearBox(): void;
+        static getMenu(): any;
+        static getScene(): any;
+        static getContainerByType(type: UIType): egret.DisplayObjectContainer;
+        static hidePanel(panel?: any): void;
+        static readonly panelHistory: UIHistory;
+        static setBoxVisible(visible: boolean, without?: BaseComponent): void;
+        static setRoot(container: egret.DisplayObjectContainer): void;
     }
 }
 /**
@@ -724,6 +1614,20 @@ declare module dragon {
     var extra: ExtraInfo;
 }
 /**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 全局事件名 Key 值
+     * @export
+     * @class NoticeNameKey
+     */
+    class NoticeNameKey {
+        static GetComponent: string;
+    }
+    var key: typeof NoticeNameKey;
+}
+/**
  * 游戏框架的基础配置设置
  * @author Andrew_Huang
  */
@@ -775,6 +1679,23 @@ declare module dragon {
         static init(config: any): void;
     }
     function getSetting(): ISetting;
+}
+/**
+ * @author Andrew_Huang
+ */
+declare module dragon {
+    /**
+     * 对象的一个属性发生更改时传递到事件侦听器的事件
+     * @export
+     * @class PropertyEvent
+     * @extends {egret.Event}
+     */
+    class PropertyEvent extends egret.Event {
+        static PROPERTY_CHANGE: string;
+        property: string;
+        constructor(type: string, bubbles?: boolean, cancelable?: boolean, property?: string);
+        static dispatchPropertyEvent(target: egret.IEventDispatcher, eventType: string, property?: string): boolean;
+    }
 }
 /**
  * @author Andrew_Huang
@@ -1272,6 +2193,43 @@ declare module dragon {
      * @class Display
      */
     class Display {
+        /**
+         * 舞台高
+         * @readonly
+         * @static
+         * @type {number}
+         * @memberof Display
+         */
+        static readonly stageH: number;
+        /**
+         * 舞台宽
+         * @readonly
+         * @static
+         * @type {number}
+         * @memberof Display
+         */
+        static readonly stageW: number;
+        /**
+         * 销毁 container 所有的子元素
+         * @static
+         * @param {*} container
+         * @memberof Display
+         */
+        static destroyChildren(container: any): void;
+        /**
+         * 设置 display 的尺寸，满屏显示
+         * @static
+         * @param {egret.DisplayObject} display
+         * @memberof Display
+         */
+        static setFullDisplay(display: egret.DisplayObject): void;
+        /**
+         * 从父级移除 child
+         * @param {(egret.DisplayObject | dragon.BaseComponent)} child
+         * @param {boolean} [forceRemove=false]
+         * @memberof Display
+         */
+        static removeFromParent(child: egret.DisplayObject | dragon.BaseComponent, forceRemove?: boolean): void;
     }
 }
 /**
