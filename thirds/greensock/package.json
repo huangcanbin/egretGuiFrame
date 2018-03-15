@@ -1,8 +1,0 @@
-{
-  "name": "greensock",
-  "version": "5.0.6",
-  "dep": [
-
-  ],
-  "typings": "src/greensock.d.ts"
-}

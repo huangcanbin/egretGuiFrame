@@ -1,8 +1,0 @@
-{
-  "name": "promise",
-  "version": "3.0.3",
-  "dep": [
-
-  ],
-  "typings": "src/lib.es2015.promise.d.ts"
-}
