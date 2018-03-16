@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outFile": "bin/is/is.js",
+    "allowJs": true
+  },
+  "files": [
+    "src/is.js"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "moment",
+  "version": "5.0.6",
+  "dep": [
+
+  ],
+  "typings": "src/moment.d.ts"
+}

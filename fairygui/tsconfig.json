@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"target": "es5",
+		"rootDir": "source",
+		"declaration": true,
+		"outFile": "bin/fairygui.js"
+	},
+	"include": [
+		"source/**/*.ts",
+		"include/**/*.ts"
+	],
+	"exclude": [
+		"bin"
+	]
+}

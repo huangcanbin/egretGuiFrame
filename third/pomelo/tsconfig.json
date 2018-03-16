@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outFile": "bin/Pomelo/Pomelo.js",
+        "allowJs": true
+    },
+    "files": [
+        "src/Pomelo.js"
+    ]
+}
