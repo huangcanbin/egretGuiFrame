@@ -1289,28 +1289,24 @@ var dragon;
         }
         Object.defineProperty(BaseComponent.prototype, "displayObject", {
             get: function () {
-                return this._displayObject.displayObject;
+                return this._display.displayObject;
             },
             enumerable: true,
             configurable: true
         });
         Object.defineProperty(BaseComponent.prototype, "display", {
             get: function () {
-                return this._displayObject;
+                return this._display;
             },
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(BaseComponent.prototype, "skinName", {
-            set: function (name) {
-                if (name) {
-                    var keys = name.split('.');
-                    var pkgName = keys[0];
-                    var resName = keys[1];
-                    var userClass = keys[2] ? keys[2] : null;
-                    this._displayObject = fairygui.UIPackage.createObject(pkgName, resName, userClass).asCom;
+        Object.defineProperty(BaseComponent.prototype, "skin", {
+            set: function (obj) {
+                if (obj) {
+                    this._display = obj.asCom;
                     this.display.name = 'UI_CONTAINER';
-                    this.addChild(this.displayObject);
+                    this.addChild(obj);
                     this.width = this.displayObject.width;
                     this.height = this.displayObject.height;
                 }
@@ -1346,9 +1342,9 @@ var dragon;
          * @memberof BaseComponent
          */
         BaseComponent.prototype.onExit = function () {
-            if (this._displayObject) {
-                this._displayObject.removeChildren();
-                this._displayObject.dispose();
+            if (this._display) {
+                this._display.removeChildren();
+                this._display.dispose();
             }
             this.removeChildren();
         };
@@ -1609,7 +1605,7 @@ var dragon;
             configurable: true
         });
         return BaseComponent;
-    }(egret.DisplayObjectContainer));
+    }(fairygui.GComponent));
     dragon.BaseComponent = BaseComponent;
 })(dragon || (dragon = {}));
 /**
@@ -2204,30 +2200,29 @@ var dragon;
             _this._panelInstanceMap = {}; //面板实例映射
             _this._currentPanel = null; //当前面板
             _this._sequenceBoxMap = {}; //弹框序列映射
-            _this.touchEnabled = false;
-            _this._scene = new fairygui.UIContainer();
-            _this._scene.touchEnabled = false;
+            _this._scene = new fairygui.GComponent();
+            _this._scene.displayObject.touchEnabled = false;
             _this.addChild(_this._scene);
-            _this._common = new fairygui.UIContainer();
-            _this._common.touchEnabled = false;
+            _this._common = new fairygui.GComponent();
+            _this._common.displayObject.touchEnabled = false;
             _this.addChild(_this._common);
-            _this._panel = new fairygui.UIContainer();
-            _this._panel.touchEnabled = false;
+            _this._panel = new fairygui.GComponent();
+            _this._panel.displayObject.touchEnabled = false;
             _this.addChild(_this._panel);
-            _this._menu = new fairygui.UIContainer();
-            _this._menu.touchEnabled = false;
+            _this._menu = new fairygui.GComponent();
+            _this._menu.displayObject.touchEnabled = false;
             _this.addChild(_this._menu);
-            _this._topScene = new fairygui.UIContainer();
-            _this._topScene.touchEnabled = false;
+            _this._topScene = new fairygui.GComponent();
+            _this._topScene.displayObject.touchEnabled = false;
             _this.addChild(_this._topScene);
-            _this._box = new fairygui.UIContainer();
-            _this._box.touchEnabled = false;
+            _this._box = new fairygui.GComponent();
+            _this._box.displayObject.touchEnabled = false;
             _this.addChild(_this._box);
-            _this._guide = new fairygui.UIContainer();
-            _this._guide.touchEnabled = false;
+            _this._guide = new fairygui.GComponent();
+            _this._guide.displayObject.touchEnabled = false;
             _this.addChild(_this._guide);
-            _this._tooltip = new fairygui.UIContainer();
-            _this._tooltip.touchEnabled = false;
+            _this._tooltip = new fairygui.GComponent();
+            _this._tooltip.displayObject.touchEnabled = false;
             _this.addChild(_this._tooltip);
             _this._containerArr = [_this._scene, _this._common, _this._panel, _this._menu, _this._topScene, _this._box, _this._guide, _this._tooltip];
             return _this;
@@ -2333,7 +2328,7 @@ var dragon;
             var _this = this;
             if (component.animation) {
                 component.visible = true;
-                if (component.stage) {
+                if (component.parent) {
                     this.showAnimation(component);
                 }
                 else {
@@ -2984,7 +2979,7 @@ var dragon;
         /**
          * 设置根容器
          * @private
-         * @param {egret.DisplayObjectContainer} container
+         * @param {fairygui.GComponent} container
          * @memberof UI
          */
         UI.prototype.setRoot = function (container) {
@@ -3156,7 +3151,7 @@ var dragon;
             dragon.singleton(UI).setRoot(container);
         };
         return UI;
-    }(fairygui.UIContainer));
+    }(fairygui.GComponent));
     dragon.UI = UI;
 })(dragon || (dragon = {}));
 /**
@@ -4464,8 +4459,14 @@ var dragon;
          * @memberof Display
          */
         Display.setFullDisplay = function (display) {
-            display.width = this.stageW;
-            display.height = this.stageH;
+            if (display instanceof fairygui.GComponent) {
+                display.displayObject.width = this.stageW;
+                display.displayObject.height = this.stageH;
+            }
+            else {
+                display.width = this.stageW;
+                display.height = this.stageH;
+            }
         };
         /**
          * 从父级移除 child
@@ -4480,7 +4481,12 @@ var dragon;
             }
             else {
                 if (is.truthy(child) && child.parent) {
-                    child.parent.removeChild(child);
+                    if (child instanceof dragon.BaseComponent) {
+                        child.removeChild(child);
+                    }
+                    else {
+                        child.parent.removeChild(child);
+                    }
                 }
             }
         };

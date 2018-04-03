@@ -1,5 +1,7 @@
-declare module fairygui {
-    class GObject extends egret.EventDispatcher {
+declare module fairygui
+{
+    class GObject extends egret.EventDispatcher
+    {
         data: any;
         packageItem: PackageItem;
         static draggingObject: GObject;
@@ -187,8 +189,10 @@ declare module fairygui {
         private __end2(evt);
     }
 }
-declare module fairygui {
-    class UBBParser {
+declare module fairygui
+{
+    class UBBParser
+    {
         private _text;
         private _readPos;
         protected _handlers: any;
@@ -209,55 +213,65 @@ declare module fairygui {
         parse(text: string): string;
     }
 }
-declare module fairygui {
-    enum ButtonMode {
+declare module fairygui
+{
+    enum ButtonMode
+    {
         Common = 0,
         Check = 1,
         Radio = 2,
     }
-    enum AutoSizeType {
+    enum AutoSizeType
+    {
         None = 0,
         Both = 1,
         Height = 2,
     }
-    enum AlignType {
+    enum AlignType
+    {
         Left = 0,
         Center = 1,
         Right = 2,
     }
-    enum VertAlignType {
+    enum VertAlignType
+    {
         Top = 0,
         Middle = 1,
         Bottom = 2,
     }
-    enum LoaderFillType {
+    enum LoaderFillType
+    {
         None = 0,
         Scale = 1,
         ScaleMatchHeight = 2,
         ScaleMatchWidth = 3,
         ScaleFree = 4,
     }
-    enum ListLayoutType {
+    enum ListLayoutType
+    {
         SingleColumn = 0,
         SingleRow = 1,
         FlowHorizontal = 2,
         FlowVertical = 3,
         Pagination = 4,
     }
-    enum ListSelectionMode {
+    enum ListSelectionMode
+    {
         Single = 0,
         Multiple = 1,
         Multiple_SingleClick = 2,
         None = 3,
     }
-    enum OverflowType {
+    enum OverflowType
+    {
         Visible = 0,
         Hidden = 1,
         Scroll = 2,
         Scale = 3,
         ScaleFree = 4,
     }
-    enum PackageItemType {
+    enum PackageItemType
+    {
         Image = 0,
         Swf = 1,
         MovieClip = 2,
@@ -267,40 +281,47 @@ declare module fairygui {
         Font = 6,
         Atlas = 7,
     }
-    enum ProgressTitleType {
+    enum ProgressTitleType
+    {
         Percent = 0,
         ValueAndMax = 1,
         Value = 2,
         Max = 3,
     }
-    enum ScrollBarDisplayType {
+    enum ScrollBarDisplayType
+    {
         Default = 0,
         Visible = 1,
         Auto = 2,
         Hidden = 3,
     }
-    enum ScrollType {
+    enum ScrollType
+    {
         Horizontal = 0,
         Vertical = 1,
         Both = 2,
     }
-    enum FlipType {
+    enum FlipType
+    {
         None = 0,
         Horizontal = 1,
         Vertical = 2,
         Both = 3,
     }
-    enum ChildrenRenderOrder {
+    enum ChildrenRenderOrder
+    {
         Ascent = 0,
         Descent = 1,
         Arch = 2,
     }
-    enum GroupLayoutType {
+    enum GroupLayoutType
+    {
         None = 0,
         Horizontal = 1,
         Vertical = 2,
     }
-    enum RelationType {
+    enum RelationType
+    {
         Left_Left = 0,
         Left_Center = 1,
         Left_Right = 2,
@@ -345,8 +366,10 @@ declare module fairygui {
     function parseEaseType(value: string): Function;
     function parseGroupLayoutType(value: string): GroupLayoutType;
 }
-declare module fairygui {
-    class GComponent extends GObject {
+declare module fairygui
+{
+    class GComponent extends GObject
+    {
         private _sortingChildCount;
         private _opaque;
         private _childrenRenderOrder;
@@ -430,8 +453,10 @@ declare module fairygui {
         private ___removed(evt);
     }
 }
-declare module fairygui {
-    class GearBase {
+declare module fairygui
+{
+    class GearBase
+    {
         static disableAllTweenEffect: boolean;
         protected _tween: boolean;
         protected _easeType: Function;
@@ -454,8 +479,10 @@ declare module fairygui {
         updateState(): void;
     }
 }
-declare module fairygui {
-    class GObjectPool {
+declare module fairygui
+{
+    class GObjectPool
+    {
         private _pool;
         private _count;
         constructor();
@@ -465,8 +492,10 @@ declare module fairygui {
         returnObject(obj: GObject): void;
     }
 }
-declare module fairygui {
-    class GTextField extends GObject {
+declare module fairygui
+{
+    class GTextField extends GObject
+    {
         protected _textField: egret.TextField;
         protected _bitmapContainer: egret.DisplayObjectContainer;
         protected _font: string;
@@ -525,7 +554,8 @@ declare module fairygui {
         setup_beforeAdd(xml: any): void;
         setup_afterAdd(xml: any): void;
     }
-    class LineInfo {
+    class LineInfo
+    {
         width: number;
         height: number;
         textHeight: number;
@@ -538,8 +568,10 @@ declare module fairygui {
         constructor();
     }
 }
-declare module fairygui {
-    class ControllerAction {
+declare module fairygui
+{
+    class ControllerAction
+    {
         fromPage: string[];
         toPage: string[];
         static createAction(type: string): ControllerAction;
@@ -550,8 +582,10 @@ declare module fairygui {
         setup(xml: any): void;
     }
 }
-declare module fairygui {
-    class GearAnimation extends GearBase {
+declare module fairygui
+{
+    class GearAnimation extends GearBase
+    {
         private _storage;
         private _default;
         constructor(owner: GObject);
@@ -561,8 +595,10 @@ declare module fairygui {
         updateState(): void;
     }
 }
-declare module fairygui {
-    class DragDropManager {
+declare module fairygui
+{
+    class DragDropManager
+    {
         private _agent;
         private _sourceData;
         private static _inst;
@@ -575,8 +611,10 @@ declare module fairygui {
         private __dragEnd(evt);
     }
 }
-declare module fairygui {
-    class GearColor extends GearBase {
+declare module fairygui
+{
+    class GearColor extends GearBase
+    {
         private _storage;
         private _default;
         constructor(owner: GObject);
@@ -586,8 +624,10 @@ declare module fairygui {
         updateState(): void;
     }
 }
-declare module fairygui {
-    class GearDisplay extends GearBase {
+declare module fairygui
+{
+    class GearDisplay extends GearBase
+    {
         pages: string[];
         private _visible;
         constructor(owner: GObject);
@@ -598,8 +638,10 @@ declare module fairygui {
         readonly connected: boolean;
     }
 }
-declare module fairygui {
-    class GearIcon extends GearBase {
+declare module fairygui
+{
+    class GearIcon extends GearBase
+    {
         private _storage;
         private _default;
         constructor(owner: GObject);
@@ -609,8 +651,10 @@ declare module fairygui {
         updateState(): void;
     }
 }
-declare module fairygui {
-    class GearLook extends GearBase {
+declare module fairygui
+{
+    class GearLook extends GearBase
+    {
         tweener: egret.Tween;
         private _storage;
         private _default;
@@ -623,34 +667,10 @@ declare module fairygui {
         updateState(): void;
     }
 }
-declare module fairygui {
-    class GearSize extends GearBase {
-        tweener: egret.Tween;
-        private _storage;
-        private _default;
-        private _tweenValue;
-        private _tweenTarget;
-        constructor(owner: GObject);
-        protected init(): void;
-        protected addStatus(pageId: string, value: string): void;
-        apply(): void;
-        updateState(): void;
-        updateFromRelations(dx: number, dy: number): void;
-    }
-}
-declare module fairygui {
-    class GearText extends GearBase {
-        private _storage;
-        private _default;
-        constructor(owner: GObject);
-        protected init(): void;
-        protected addStatus(pageId: string, value: string): void;
-        apply(): void;
-        updateState(): void;
-    }
-}
-declare module fairygui {
-    class GearXY extends GearBase {
+declare module fairygui
+{
+    class GearSize extends GearBase
+    {
         tweener: egret.Tween;
         private _storage;
         private _default;
@@ -664,8 +684,40 @@ declare module fairygui {
         updateFromRelations(dx: number, dy: number): void;
     }
 }
-declare module fairygui {
-    class GGraph extends GObject {
+declare module fairygui
+{
+    class GearText extends GearBase
+    {
+        private _storage;
+        private _default;
+        constructor(owner: GObject);
+        protected init(): void;
+        protected addStatus(pageId: string, value: string): void;
+        apply(): void;
+        updateState(): void;
+    }
+}
+declare module fairygui
+{
+    class GearXY extends GearBase
+    {
+        tweener: egret.Tween;
+        private _storage;
+        private _default;
+        private _tweenValue;
+        private _tweenTarget;
+        constructor(owner: GObject);
+        protected init(): void;
+        protected addStatus(pageId: string, value: string): void;
+        apply(): void;
+        updateState(): void;
+        updateFromRelations(dx: number, dy: number): void;
+    }
+}
+declare module fairygui
+{
+    class GGraph extends GObject
+    {
         private _graphics;
         private _type;
         private _lineSize;
@@ -690,8 +742,10 @@ declare module fairygui {
         setup_beforeAdd(xml: any): void;
     }
 }
-declare module fairygui {
-    class GGroup extends GObject {
+declare module fairygui
+{
+    class GGroup extends GObject
+    {
         private _layout;
         private _lineGap;
         private _columnGap;
@@ -715,8 +769,10 @@ declare module fairygui {
         setup_afterAdd(xml: any): void;
     }
 }
-declare module fairygui {
-    class GImage extends GObject {
+declare module fairygui
+{
+    class GImage extends GObject
+    {
         private _content;
         private _color;
         private _flip;
@@ -735,8 +791,10 @@ declare module fairygui {
         setup_beforeAdd(xml: any): void;
     }
 }
-declare module fairygui {
-    class GLabel extends GComponent {
+declare module fairygui
+{
+    class GLabel extends GComponent
+    {
         protected _titleObject: GObject;
         protected _iconObject: GObject;
         constructor();
@@ -751,8 +809,10 @@ declare module fairygui {
         setup_afterAdd(xml: any): void;
     }
 }
-declare module fairygui {
-    class GList extends GComponent {
+declare module fairygui
+{
+    class GList extends GComponent
+    {
         /**
         * itemRenderer(number number, GObject item);
         */
@@ -859,8 +919,10 @@ declare module fairygui {
         setup_afterAdd(xml: any): void;
     }
 }
-declare module fairygui {
-    class GLoader extends GObject {
+declare module fairygui
+{
+    class GLoader extends GObject
+    {
         private _gearAnimation;
         private _gearColor;
         private _url;
@@ -914,8 +976,10 @@ declare module fairygui {
         setup_beforeAdd(xml: any): void;
     }
 }
-declare module fairygui {
-    class GMovieClip extends GObject {
+declare module fairygui
+{
+    class GMovieClip extends GObject
+    {
         private _movieClip;
         constructor();
         color: number;
@@ -927,8 +991,10 @@ declare module fairygui {
         setup_beforeAdd(xml: any): void;
     }
 }
-declare module fairygui {
-    class AsyncOperation {
+declare module fairygui
+{
+    class AsyncOperation
+    {
         /**
          * callback(obj:GObject)
          */
@@ -946,8 +1012,10 @@ declare module fairygui {
         private run();
     }
 }
-declare module fairygui {
-    class GButton extends GComponent {
+declare module fairygui
+{
+    class GButton extends GComponent
+    {
         protected _titleObject: GObject;
         protected _iconObject: GObject;
         protected _relatedController: Controller;
@@ -1005,8 +1073,10 @@ declare module fairygui {
         private __click(evt);
     }
 }
-declare module fairygui {
-    class GProgressBar extends GComponent {
+declare module fairygui
+{
+    class GProgressBar extends GComponent
+    {
         private _max;
         private _value;
         private _titleType;
@@ -1037,14 +1107,18 @@ declare module fairygui {
         dispose(): void;
     }
 }
-declare module fairygui {
-    class GRichTextField extends GTextField {
+declare module fairygui
+{
+    class GRichTextField extends GTextField
+    {
         constructor();
         protected updateTextFieldText(): void;
     }
 }
-declare module fairygui {
-    class GRoot extends GComponent {
+declare module fairygui
+{
+    class GRoot extends GComponent
+    {
         private _nativeStage;
         private _modalLayer;
         private _popupStack;
@@ -1099,8 +1173,10 @@ declare module fairygui {
         private __winResize(evt);
     }
 }
-declare module fairygui {
-    class GScrollBar extends GComponent {
+declare module fairygui
+{
+    class GScrollBar extends GComponent
+    {
         private _grip;
         private _arrowButton1;
         private _arrowButton2;
@@ -1125,8 +1201,10 @@ declare module fairygui {
         private __barMouseDown(evt);
     }
 }
-declare module fairygui {
-    class GSlider extends GComponent {
+declare module fairygui
+{
+    class GSlider extends GComponent
+    {
         private _max;
         private _value;
         private _titleType;
@@ -1161,8 +1239,10 @@ declare module fairygui {
         private __barMouseDown(evt);
     }
 }
-declare module fairygui {
-    class GComboBox extends GComponent {
+declare module fairygui
+{
+    class GComboBox extends GComponent
+    {
         dropdown: GComponent;
         protected _titleObject: GObject;
         protected _iconObject: GObject;
@@ -1206,8 +1286,10 @@ declare module fairygui {
         private __mouseup(evt);
     }
 }
-declare module fairygui {
-    class GTextInput extends GTextField {
+declare module fairygui
+{
+    class GTextInput extends GTextField
+    {
         private _changed;
         private _promptText;
         private _password;
@@ -1229,8 +1311,10 @@ declare module fairygui {
         private __focusOut(evt);
     }
 }
-declare module fairygui {
-    class Controller extends egret.EventDispatcher {
+declare module fairygui
+{
+    class Controller extends egret.EventDispatcher
+    {
         private _name;
         private _selectedIndex;
         private _previousIndex;
@@ -1269,15 +1353,19 @@ declare module fairygui {
         setup(xml: any): void;
     }
 }
-declare module fairygui {
-    interface IUISource {
+declare module fairygui
+{
+    interface IUISource
+    {
         fileName: string;
         loaded: boolean;
         load(callback: Function, thisObj: any): void;
     }
 }
-declare module fairygui {
-    class Margin {
+declare module fairygui
+{
+    class Margin
+    {
         left: number;
         right: number;
         top: number;
@@ -1287,8 +1375,10 @@ declare module fairygui {
         copy(source: Margin): void;
     }
 }
-declare module fairygui {
-    class PackageItem {
+declare module fairygui
+{
+    class PackageItem
+    {
         owner: UIPackage;
         type: PackageItemType;
         id: string;
@@ -1316,8 +1406,10 @@ declare module fairygui {
         toString(): string;
     }
 }
-declare module fairygui {
-    class PageOption {
+declare module fairygui
+{
+    class PageOption
+    {
         private _controller;
         private _id;
         constructor();
@@ -1328,8 +1420,10 @@ declare module fairygui {
         id: string;
     }
 }
-declare module fairygui {
-    class PopupMenu {
+declare module fairygui
+{
+    class PopupMenu
+    {
         protected _contentPane: GComponent;
         protected _list: GList;
         constructor(resourceURL?: string);
@@ -1355,8 +1449,10 @@ declare module fairygui {
         private __addedToStage(evt);
     }
 }
-declare module fairygui {
-    class RelationItem {
+declare module fairygui
+{
+    class RelationItem
+    {
         private _owner;
         private _target;
         private _defs;
@@ -1382,15 +1478,18 @@ declare module fairygui {
         private __targetSizeChanged(evt);
         private __targetSizeWillChange(evt);
     }
-    class RelationDef {
+    class RelationDef
+    {
         percent: boolean;
         type: number;
         constructor();
         copyFrom(source: RelationDef): void;
     }
 }
-declare module fairygui {
-    class Relations {
+declare module fairygui
+{
+    class Relations
+    {
         private _owner;
         private _items;
         handling: GObject;
@@ -1411,16 +1510,20 @@ declare module fairygui {
         setup(xml: any): void;
     }
 }
-declare namespace fairygui {
-    class Resource {
+declare namespace fairygui
+{
+    class Resource
+    {
         private static assets;
         static setCache(assets: IResource): void;
         static getRes(key: string): any;
         static getResAsync(key: string, compFunc: Function, thisObject: any): void;
     }
 }
-declare module fairygui {
-    class ScrollPane extends egret.EventDispatcher {
+declare module fairygui
+{
+    class ScrollPane extends egret.EventDispatcher
+    {
         private _owner;
         private _maskContainer;
         private _container;
@@ -1546,8 +1649,10 @@ declare module fairygui {
         private __tweenComplete2();
     }
 }
-declare module fairygui {
-    class Transition {
+declare module fairygui
+{
+    class Transition
+    {
         name: string;
         autoPlayRepeat: number;
         autoPlayDelay: number;
@@ -1604,8 +1709,10 @@ declare module fairygui {
         private decodeValue(type, str, value);
     }
 }
-declare module fairygui {
-    class UIConfig {
+declare module fairygui
+{
+    class UIConfig
+    {
         constructor();
         static defaultFont: string;
         static windowModalWaiting: string;
@@ -1633,8 +1740,10 @@ declare module fairygui {
         static frameTimeForAsyncUIConstruction: number;
     }
 }
-declare module fairygui {
-    class UIObjectFactory {
+declare module fairygui
+{
+    class UIObjectFactory
+    {
         static packageItemExtensions: any;
         private static loaderType;
         constructor();
@@ -1645,8 +1754,10 @@ declare module fairygui {
         static newObject2(type: string): GObject;
     }
 }
-declare module fairygui {
-    class UIPackage {
+declare module fairygui
+{
+    class UIPackage
+    {
         private _id;
         private _name;
         private _basePath;
@@ -1700,8 +1811,10 @@ declare module fairygui {
         private loadFont(item);
     }
 }
-declare module fairygui {
-    class Window extends GComponent {
+declare module fairygui
+{
+    class Window extends GComponent
+    {
         private _contentPane;
         private _modalWaitPane;
         private _closeButton;
@@ -1751,8 +1864,10 @@ declare module fairygui {
         private __dragStart(evt);
     }
 }
-declare module fairygui {
-    class ChangePageAction extends ControllerAction {
+declare module fairygui
+{
+    class ChangePageAction extends ControllerAction
+    {
         objectId: string;
         controllerName: string;
         targetPage: string;
@@ -1761,8 +1876,10 @@ declare module fairygui {
         setup(xml: any): void;
     }
 }
-declare module fairygui {
-    class DisplayListItem {
+declare module fairygui
+{
+    class DisplayListItem
+    {
         packageItem: PackageItem;
         type: string;
         desc: any;
@@ -1770,8 +1887,10 @@ declare module fairygui {
         constructor(packageItem: PackageItem, type: string);
     }
 }
-declare module fairygui {
-    class PlayTransitionAction extends ControllerAction {
+declare module fairygui
+{
+    class PlayTransitionAction extends ControllerAction
+    {
         transitionName: string;
         repeat: number;
         delay: number;
@@ -1783,8 +1902,10 @@ declare module fairygui {
         setup(xml: any): void;
     }
 }
-declare module fairygui {
-    class BitmapFont {
+declare module fairygui
+{
+    class BitmapFont
+    {
         id: string;
         size: number;
         ttf: boolean;
@@ -1793,8 +1914,10 @@ declare module fairygui {
         constructor();
     }
 }
-declare module fairygui {
-    class BMGlyph {
+declare module fairygui
+{
+    class BMGlyph
+    {
         x: number;
         y: number;
         offsetX: number;
@@ -1808,16 +1931,20 @@ declare module fairygui {
         constructor();
     }
 }
-declare module fairygui {
-    class Frame {
+declare module fairygui
+{
+    class Frame
+    {
         rect: egret.Rectangle;
         addDelay: number;
         texture: egret.Texture;
         constructor();
     }
 }
-declare module fairygui {
-    class MovieClip extends egret.DisplayObject {
+declare module fairygui
+{
+    class MovieClip extends egret.DisplayObject
+    {
         interval: number;
         swing: boolean;
         repeatDelay: number;
@@ -1853,8 +1980,10 @@ declare module fairygui {
         $onRemoveFromStage(): void;
     }
 }
-declare module fairygui {
-    class PlayState {
+declare module fairygui
+{
+    class PlayState
+    {
         reachEnding: boolean;
         reversed: boolean;
         repeatedCount: number;
@@ -1869,24 +1998,30 @@ declare module fairygui {
         copy(src: PlayState): void;
     }
 }
-declare module fairygui {
-    class UIContainer extends egret.DisplayObjectContainer {
+declare module fairygui
+{
+    class UIContainer extends egret.DisplayObjectContainer
+    {
         private _hitArea;
         constructor();
         hitArea: egret.Rectangle;
         $hitTest(stageX: number, stageY: number): egret.DisplayObject;
     }
 }
-declare module fairygui {
-    class UISprite extends egret.Sprite {
+declare module fairygui
+{
+    class UISprite extends egret.Sprite
+    {
         private _hitArea;
         constructor();
         hitArea: egret.Rectangle;
         $hitTest(stageX: number, stageY: number): egret.DisplayObject;
     }
 }
-declare module fairygui {
-    class DragEvent extends egret.Event {
+declare module fairygui
+{
+    class DragEvent extends egret.Event
+    {
         stageX: number;
         stageY: number;
         touchPointID: number;
@@ -1899,15 +2034,19 @@ declare module fairygui {
         isDefaultPrevented(): boolean;
     }
 }
-declare module fairygui {
-    class DropEvent extends egret.Event {
+declare module fairygui
+{
+    class DropEvent extends egret.Event
+    {
         source: any;
         static DROP: string;
         constructor(type: string, source?: any);
     }
 }
-declare module fairygui {
-    class ItemEvent extends egret.Event {
+declare module fairygui
+{
+    class ItemEvent extends egret.Event
+    {
         itemObject: GObject;
         stageX: number;
         stageY: number;
@@ -1915,14 +2054,18 @@ declare module fairygui {
         constructor(type: string, itemObject?: GObject, stageX?: number, stageY?: number);
     }
 }
-declare module fairygui {
-    class StateChangeEvent extends egret.Event {
+declare module fairygui
+{
+    class StateChangeEvent extends egret.Event
+    {
         static CHANGED: string;
         constructor(type: string);
     }
 }
-declare module fairygui {
-    class ColorMatrix {
+declare module fairygui
+{
+    class ColorMatrix
+    {
         matrix: Array<number>;
         private static IDENTITY_MATRIX;
         private static LENGTH;
@@ -1945,8 +2088,10 @@ declare module fairygui {
         protected cleanValue(p_val: number, p_limit: number): number;
     }
 }
-declare module fairygui {
-    class GTimers {
+declare module fairygui
+{
+    class GTimers
+    {
         private _items;
         private _itemPool;
         private _enumI;
@@ -1969,8 +2114,10 @@ declare module fairygui {
         private __timer(timeStamp);
     }
 }
-declare module fairygui {
-    class ToolSet {
+declare module fairygui
+{
+    class ToolSet
+    {
         constructor();
         static getFileName(source: string): string;
         static startsWith(source: string, str: string, ignoreCase?: boolean): boolean;
@@ -1989,8 +2136,10 @@ declare module fairygui {
         static clamp01(value: number): number;
     }
 }
-declare namespace fairygui {
-    interface IResource {
+declare namespace fairygui
+{
+    interface IResource
+    {
         getRes(url: string): any;
         getResAsync(key: string, compFunc: Function, thisObject: any): void;
     }

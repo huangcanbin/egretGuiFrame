@@ -53,10 +53,17 @@ module dragon
          * @param {egret.DisplayObject} display 
          * @memberof Display
          */
-        public static setFullDisplay(display: egret.DisplayObject): void
+        public static setFullDisplay(display: egret.DisplayObject | fairygui.GComponent): void
         {
-            display.width = this.stageW;
-            display.height = this.stageH;
+            if (display instanceof fairygui.GComponent)
+            {
+                display.displayObject.width = this.stageW;
+                display.displayObject.height = this.stageH;
+            } else
+            {
+                display.width = this.stageW;
+                display.height = this.stageH;
+            }
         }
 
         /**
@@ -74,7 +81,13 @@ module dragon
             {
                 if (is.truthy(child) && child.parent)
                 {
-                    child.parent.removeChild(child);
+                    if (child instanceof dragon.BaseComponent)
+                    {
+                        child.removeChild(child);
+                    } else
+                    {
+                        child.parent.removeChild(child);
+                    }
                 }
             }
         }

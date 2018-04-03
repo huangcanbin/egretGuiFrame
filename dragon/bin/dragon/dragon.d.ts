@@ -689,8 +689,8 @@ declare module dragon {
      * @implements {IComponent}
      * @implements {dragon.IUIAnimationDisplay}
      */
-    class BaseComponent extends egret.DisplayObjectContainer implements IComponent, dragon.IUIAnimationDisplay {
-        private _displayObject;
+    class BaseComponent extends fairygui.GComponent implements IComponent, dragon.IUIAnimationDisplay {
+        private _display;
         private $_anim;
         private $_data;
         private $_state;
@@ -704,7 +704,7 @@ declare module dragon {
         constructor(...args: any[]);
         readonly displayObject: egret.DisplayObject;
         readonly display: fairygui.GComponent;
-        skinName: string;
+        skin: fairygui.GObject;
         ckearListeners(): void;
         /**
          * 设置参数
@@ -739,7 +739,7 @@ declare module dragon {
          * @param {UI_TYPE} [type]
          * @memberof BaseComponent
          */
-        getAnimationDisplay(type?: UI_TYPE): egret.DisplayObject;
+        getAnimationDisplay(type?: UI_TYPE): egret.DisplayObject | fairygui.GComponent;
         /**
          * 获取子显示层
          * @private
@@ -1189,7 +1189,7 @@ declare module dragon {
      * @class UI
      * @extends {fairygui.UIContainer}
      */
-    class UI extends fairygui.UIContainer {
+    class UI extends fairygui.GComponent {
         private _scene;
         private _common;
         private _panel;
@@ -1466,7 +1466,7 @@ declare module dragon {
          * @returns {fairygui.UIContainer}
          * @memberof UI
          */
-        getContainerByType(type: UIType): fairygui.UIContainer;
+        getContainerByType(type: UIType): fairygui.GComponent;
         /**
          * 是否存在面板显示着
          * @returns {boolean}
@@ -1505,7 +1505,7 @@ declare module dragon {
         /**
          * 设置根容器
          * @private
-         * @param {egret.DisplayObjectContainer} container
+         * @param {fairygui.GComponent} container
          * @memberof UI
          */
         private setRoot(container);
@@ -1536,11 +1536,11 @@ declare module dragon {
         static clearBox(): void;
         static getMenu(): any;
         static getScene(): any;
-        static getContainerByType(type: UIType): egret.DisplayObjectContainer;
+        static getContainerByType(type: UIType): fairygui.GComponent;
         static hidePanel(panel?: any): void;
         static readonly panelHistory: UIHistory;
         static setBoxVisible(visible: boolean, without?: BaseComponent): void;
-        static setRoot(container: egret.DisplayObjectContainer): void;
+        static setRoot(container: fairygui.GComponent): void;
     }
 }
 /**
@@ -2222,7 +2222,7 @@ declare module dragon {
          * @param {egret.DisplayObject} display
          * @memberof Display
          */
-        static setFullDisplay(display: egret.DisplayObject): void;
+        static setFullDisplay(display: egret.DisplayObject | fairygui.GComponent): void;
         /**
          * 从父级移除 child
          * @param {(egret.DisplayObject | dragon.BaseComponent)} child

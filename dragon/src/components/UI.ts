@@ -158,17 +158,17 @@ module dragon
      * @class UI
      * @extends {fairygui.UIContainer}
      */
-    export class UI extends fairygui.UIContainer
+    export class UI extends fairygui.GComponent
     {
-        private _scene: fairygui.UIContainer;    //场景层
-        private _common: fairygui.UIContainer;   //公共UI层
-        private _panel: fairygui.UIContainer;    //面板层
-        private _menu: fairygui.UIContainer;     //菜单层
-        private _topScene: fairygui.UIContainer; //顶层场景（如加载界面）
-        private _box: fairygui.UIContainer;      //弹框层
-        private _guide: fairygui.UIContainer;    //新手引导层
-        private _tooltip: fairygui.UIContainer;  //浮动层
-        private _containerArr: fairygui.UIContainer[];  //容器层次列表
+        private _scene: fairygui.GComponent;    //场景层
+        private _common: fairygui.GComponent;   //公共UI层
+        private _panel: fairygui.GComponent;    //面板层
+        private _menu: fairygui.GComponent;     //菜单层
+        private _topScene: fairygui.GComponent; //顶层场景（如加载界面）
+        private _box: fairygui.GComponent;      //弹框层
+        private _guide: fairygui.GComponent;    //新手引导层
+        private _tooltip: fairygui.GComponent;  //浮动层
+        private _containerArr: fairygui.GComponent[];  //容器层次列表
         private _panelTypeMap: { [key: string]: UIPanelInfo } = {}; //面板信息映射表
         private _panelInstanceMap: any = {};     //面板实例映射
         private _currentPanel: any = null;       //当前面板
@@ -179,30 +179,29 @@ module dragon
         public constructor()
         {
             super();
-            this.touchEnabled = false;
-            this._scene = new fairygui.UIContainer();
-            this._scene.touchEnabled = false;
+            this._scene = new fairygui.GComponent();
+            this._scene.displayObject.touchEnabled = false;
             this.addChild(this._scene);
-            this._common = new fairygui.UIContainer();
-            this._common.touchEnabled = false;
+            this._common = new fairygui.GComponent();
+            this._common.displayObject.touchEnabled = false;
             this.addChild(this._common);
-            this._panel = new fairygui.UIContainer();
-            this._panel.touchEnabled = false;
+            this._panel = new fairygui.GComponent();
+            this._panel.displayObject.touchEnabled = false;
             this.addChild(this._panel);
-            this._menu = new fairygui.UIContainer();
-            this._menu.touchEnabled = false;
+            this._menu = new fairygui.GComponent();
+            this._menu.displayObject.touchEnabled = false;
             this.addChild(this._menu);
-            this._topScene = new fairygui.UIContainer();
-            this._topScene.touchEnabled = false;
+            this._topScene = new fairygui.GComponent();
+            this._topScene.displayObject.touchEnabled = false;
             this.addChild(this._topScene);
-            this._box = new fairygui.UIContainer();
-            this._box.touchEnabled = false;
+            this._box = new fairygui.GComponent();
+            this._box.displayObject.touchEnabled = false;
             this.addChild(this._box);
-            this._guide = new fairygui.UIContainer();
-            this._guide.touchEnabled = false;
+            this._guide = new fairygui.GComponent();
+            this._guide.displayObject.touchEnabled = false;
             this.addChild(this._guide);
-            this._tooltip = new fairygui.UIContainer();
-            this._tooltip.touchEnabled = false;
+            this._tooltip = new fairygui.GComponent();
+            this._tooltip.displayObject.touchEnabled = false;
             this.addChild(this._tooltip);
             this._containerArr = [this._scene, this._common, this._panel, this._menu, this._topScene, this._box, this._guide, this._tooltip];
         }
@@ -331,7 +330,7 @@ module dragon
             if (component.animation)
             {
                 component.visible = true;
-                if (component.stage)
+                if (component.parent)
                 {
                     this.showAnimation(component);
                 } else
@@ -944,7 +943,7 @@ module dragon
          * @returns {BaseComponent} 
          * @memberof UI
          */
-        private getComponentByName(name: string, container: egret.DisplayObjectContainer): BaseComponent
+        private getComponentByName(name: string, container: fairygui.GComponent): BaseComponent
         {
             let num: number = container.numChildren;
             for (let i: number = 0; i < num; i++)
@@ -1006,7 +1005,7 @@ module dragon
          * @returns {fairygui.UIContainer} 
          * @memberof UI
          */
-        public getContainerByType(type: UIType): fairygui.UIContainer
+        public getContainerByType(type: UIType): fairygui.GComponent
         {
             switch (type)
             {
@@ -1094,10 +1093,10 @@ module dragon
         /**
          * 设置根容器
          * @private
-         * @param {egret.DisplayObjectContainer} container 
+         * @param {fairygui.GComponent} container 
          * @memberof UI
          */
-        private setRoot(container: egret.DisplayObjectContainer): void
+        private setRoot(container: fairygui.GComponent): void
         {
             if (container)
             {
@@ -1244,7 +1243,7 @@ module dragon
             return ui;
         }
 
-        public static getContainerByType(type: UIType): egret.DisplayObjectContainer
+        public static getContainerByType(type: UIType): fairygui.GComponent
         {
             return singleton(UI).getContainerByType(type);
         }
@@ -1271,7 +1270,7 @@ module dragon
             }
         }
 
-        public static setRoot(container: egret.DisplayObjectContainer): void
+        public static setRoot(container: fairygui.GComponent): void
         {
             singleton(UI).setRoot(container);
         }

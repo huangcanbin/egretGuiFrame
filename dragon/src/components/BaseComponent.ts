@@ -46,9 +46,9 @@ module dragon
      * @implements {IComponent}
      * @implements {dragon.IUIAnimationDisplay}
      */
-    export class BaseComponent extends egret.DisplayObjectContainer implements IComponent, dragon.IUIAnimationDisplay
+    export class BaseComponent extends fairygui.GComponent implements IComponent, dragon.IUIAnimationDisplay
     {
-        private _displayObject: fairygui.GComponent;
+        private _display: fairygui.GComponent;
         private $_anim: dragon.IUIAnimation;
         private $_data: any;
         private $_state: ComponentState;
@@ -69,25 +69,21 @@ module dragon
 
         public get displayObject(): egret.DisplayObject
         {
-            return this._displayObject.displayObject;
+            return this._display.displayObject;
         }
 
         public get display(): fairygui.GComponent
         {
-            return this._displayObject;
+            return this._display;
         }
 
-        public set skinName(name: string)
+        public set skin(obj: fairygui.GObject)
         {
-            if (name)
+            if (obj)
             {
-                let keys: Array<string> = name.split('.');
-                let pkgName: string = keys[0];
-                let resName: string = keys[1];
-                let userClass: string = keys[2] ? keys[2] : null;
-                this._displayObject = fairygui.UIPackage.createObject(pkgName, resName, userClass).asCom;
+                this._display = obj.asCom;
                 this.display.name = 'UI_CONTAINER';
-                this.addChild(this.displayObject);
+                this.addChild(obj);
                 this.width = this.displayObject.width;
                 this.height = this.displayObject.height;
             }
@@ -125,10 +121,10 @@ module dragon
          */
         public onExit(): void
         {
-            if (this._displayObject)
+            if (this._display)
             {
-                this._displayObject.removeChildren();
-                this._displayObject.dispose();
+                this._display.removeChildren();
+                this._display.dispose();
             }
             this.removeChildren();
         }
@@ -186,7 +182,7 @@ module dragon
          * @param {UI_TYPE} [type] 
          * @memberof BaseComponent
          */
-        public getAnimationDisplay(type?: UI_TYPE): egret.DisplayObject
+        public getAnimationDisplay(type?: UI_TYPE): egret.DisplayObject|fairygui.GComponent
         {
             if (!type || is.falsy(type))
             {
