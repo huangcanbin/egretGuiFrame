@@ -1,0 +1,8 @@
+{
+  "name": "frame",
+  "version": "1.0.1",
+  "dep": [
+
+  ],
+  "typings": "src/frame.d.ts"
+}

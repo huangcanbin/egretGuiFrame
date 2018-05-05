@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"module": "amd",
+		"target": "es5",
+		"sourceMap": true,
+		"rootDir": "source",
+		"declaration": true,
+		"noEmitOnError": true,
+		"outFile": "binary/game.js"
+	},
+	"include": [
+		"source/**/*.ts",
+		"include/**/*.ts"
+	],
+	"exclude": [
+		"binary"
+	]
+}

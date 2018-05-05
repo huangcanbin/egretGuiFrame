@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "outFile": "bin/enough/enough.js",
+        "declaration": true
+    },
+    "include": [
+        "libs/*.d.ts",
+        "src/*.ts"
+    ],
+    "files": [
+        "libs/box2d.d.ts",
+        "libs/dragonBones.d.ts",
+        "libs/dragon.d.ts",
+        "libs/egret.d.ts",
+        "libs/fairygui.d.ts",
+        "libs/frame.d.ts",
+        "libs/game.d.ts",
+        "libs/greensock.d.ts",
+        "libs/is.d.ts",
+        "libs/lib.d.ts",
+        "libs/components.d.ts",
+        "libs/promise.d.ts",
+        "libs/moment.d.ts",
+        "libs/numeral.d.ts",
+        "libs/rawinflate.d.ts",
+        "libs/socket.d.ts",
+        "libs/tween.d.ts",
+        "src/enough.ts",
+        "src/Setting.ts"
+    ]
+}

@@ -1,0 +1,25 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "chrome",
+			"request": "launch",
+			"name": "调试",
+			"trace": true,
+			"smartStep": true,
+			"sourceMaps": true,
+			// "userDataDir": "/tmp/chromium",
+			"webRoot": "${workspaceRoot}",
+			// "runtimeExecutable": "/usr/bin/chromium",
+			"file": "${workspaceRoot}/index.html",
+			"userDataDir": "${workspaceRoot}/binary/chrome",
+			"runtimeArgs": [
+				"--window-size=808,693",
+				"--window-position=1920,197",
+				"--allow-file-access-from-files",
+				"--allow-file-access-frome-files"
+			],
+			"preLaunchTask": "翻译"
+		}
+	]
+}

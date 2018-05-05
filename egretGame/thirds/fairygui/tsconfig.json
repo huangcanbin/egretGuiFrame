@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outFile": "bin/fairygui/fairygui.js",
+    "allowJs": true
+  },
+  "files": [
+    "src/fairygui.d.js",
+    "src/fairygui.js"
+  ]
+}

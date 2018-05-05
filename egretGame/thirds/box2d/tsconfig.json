@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outFile": "bin/box2d/box2d.js",
+    "allowJs": true
+  },
+  "files": [
+    "src/box2d.d.js",
+    "src/box2d.js"
+  ]
+}

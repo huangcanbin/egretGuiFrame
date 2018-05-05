@@ -1,0 +1,8 @@
+{
+    "name": "egret",
+    "version": "5.1.3",
+    "dep": [
+        "dragon",
+        "hint"
+    ]
+}

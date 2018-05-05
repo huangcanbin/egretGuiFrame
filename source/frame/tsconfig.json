@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"module": "amd",
+		"target": "es5",
+		"sourceMap": true,
+		"rootDir": "source",
+		"declaration": true,
+		// "outFile": "../game/include/frame.js",
+		"outFile": "binary/frame.js",
+		"noEmitOnError": true
+	},
+	"include": [
+		"source/**/*.ts",
+		"library/**/*.ts"
+	],
+	"exclude": [
+		"binary"
+	]
+}

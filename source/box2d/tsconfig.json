@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"module": "amd",
+		"target": "es5",
+		"rootDir": "source",
+		"sourceMap": true,
+		"declaration": true,
+		"noEmitOnError": true,
+		"outFile": "../game/include/box2d.js"
+	},
+	"include": [
+		"source/**/*.ts",
+		"include/**/*.ts"
+	],
+	"exclude": [
+		"binary"
+	]
+}

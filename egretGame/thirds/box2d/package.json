@@ -1,0 +1,6 @@
+{
+  "name": "box2d",
+  "version": "1.0.1",
+  "dep": [],
+  "typings": "src/box2d.d.ts"
+}

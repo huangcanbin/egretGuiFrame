@@ -1,0 +1,6 @@
+{
+  "name": "fairygui",
+  "version": "3.5.0",
+  "dep": [],
+  "typings": "src/fairygui.d.ts"
+}

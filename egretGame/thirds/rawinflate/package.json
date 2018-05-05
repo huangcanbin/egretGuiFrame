@@ -1,0 +1,16 @@
+{
+	"name": "egret",
+	"version": "2.5.0",
+	"modules":
+	[
+		{
+			"name": "rawinflate",
+			"description": "rawinflate",
+			"files": [
+				"rawinflate.min.js",
+				"rawinflate.d.ts"
+			],
+			"root": "src"
+		}
+	]
+}

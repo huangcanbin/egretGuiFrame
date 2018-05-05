@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>例子</title>
+	<meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="full-screen" content="true" />
+	<meta name="screen-orientation" content="portrait" />
+	<meta name="x5-fullscreen" content="true" />
+	<meta name="360-fullscreen" content="true" />
+	<style>
+		html,
+		body {
+			touch-action: none;
+			background: #ffffff;
+			padding: 0;
+			border: 0;
+			margin: 0;
+			height: 100%;
+		}
+	</style>
+</head>
+
+<body>
+
+	<div style="margin: auto;width: 792px;height: 600px;background-color:#888888;" class="egret-player" data-entry-class="Main"
+	 data-orientation="auto" data-scale-mode="showAll" data-frame-rate="30" data-content-width="792" data-content-height="600"
+	 data-show-paint-rect="false" data-multi-fingered="2" data-show-fps="false" data-show-log="false" data-show-fps-style="x:0,y:0,size:12,textColor:0xffffff,bgAlpha:0.9">
+	</div>
+
+
+	<script type="text/javascript" src="include/egret.js"></script>
+	<script type="text/javascript" src="include/egret.web.js"></script>
+	<script type="text/javascript" src="include/game.js"></script>
+	<script type="text/javascript" src="include/tween.js"></script>
+	<script type="text/javascript" src="include/res.js"></script>
+	<script type="text/javascript" src="include/eui.js"></script>
+	<script type="text/javascript" src="include/dragonBones.js"></script>
+	<script type="text/javascript" src="include/socket.js"></script>
+	<script type="text/javascript" src="include/egret3d.js"></script>
+	<script type="text/javascript" src="include/promise.js"></script>
+	<script type="text/javascript" src="include/fairygui.js"></script>
+	<script type="text/javascript" src="include/rawinflate.js"></script>
+	<script type="text/javascript" src="include/box2d.js"></script>
+	<!-- <script type="text/javascript" src="include/frame.js"></script> -->
+	<script type="text/javascript" src="binary/game.js"></script>
+
+	<script>
+		// 开发用这段
+		egret.runEgret({
+			renderMode: "webgl", audioType: 0, calculateCanvasScaleFactor: function (context) {
+				var backingStore = context.backingStorePixelRatio ||
+					context.webkitBackingStorePixelRatio ||
+					context.mozBackingStorePixelRatio ||
+					context.msBackingStorePixelRatio ||
+					context.oBackingStorePixelRatio ||
+					context.backingStorePixelRatio || 1;
+				return (window.devicePixelRatio || 1) / backingStore;
+			}
+		});
+
+		// 发布用这段
+		// var onStateChange = function () {
+		// 	if (xhr.readyState == 4) {
+		// 		var code = document.createElement('script');
+		// 		document.getElementsByTagName('head')[0].appendChild(code);
+		// 		code.text = xhr.responseText;
+		// 		egret.runEgret({
+		// 			renderMode: "webgl", audioType: 0, calculateCanvasScaleFactor: function (context) {
+		// 				var backingStore = context.backingStorePixelRatio ||
+		// 					context.webkitBackingStorePixelRatio ||
+		// 					context.mozBackingStorePixelRatio ||
+		// 					context.msBackingStorePixelRatio ||
+		// 					context.oBackingStorePixelRatio ||
+		// 					context.backingStorePixelRatio || 1;
+		// 				return (window.devicePixelRatio || 1) / backingStore;
+		// 			}
+		// 		});
+		// 	}
+		// };
+		// var xhr = new XMLHttpRequest();
+		// xhr.onreadystatechange = onStateChange;
+		// xhr.open('GET', 'binary/GodRoad.js?' + Math.random(), true);
+		// xhr.send('');
+	</script>
+</body>
+
+</html>

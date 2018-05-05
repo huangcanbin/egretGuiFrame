@@ -1,0 +1,6 @@
+{
+    "name": "pomelo",
+    "version": "5.0.6",
+    "dep": [],
+    "typings": "src/pomelo.d.ts"
+}

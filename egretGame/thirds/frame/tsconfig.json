@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outFile": "bin/frame/frame.js",
+    "allowJs": true
+  },
+  "files": [
+    "src/frame.d.js",
+    "src/frame.js"
+  ]
+}
